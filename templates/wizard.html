@@ -1,0 +1,49 @@
+<div class="container">
+  <div class="row">
+    <div class="col-lg-1 col-md-2 col-sm-3 col-xs-3">
+      <img src="images/whatsapp.png" height="50" alt="" ng-click="switcher = 1">
+    </div>
+    
+     <div class="col-lg-1 col-md-2 col-sm-3 col-xs-3">
+      <img src="images/viber.webp" height="50" alt="" ng-click="switcher = 2">
+    </div>
+    
+     <div class="col-lg-1 col-md-2 col-sm-3 col-xs-3">
+      <img src="images/skype.gif" alt="" height="50" ng-click="switcher = 3">
+    </div>
+  </div>
+</div>
+
+<div class="col-lg-4 col-md-8 col-sm-8 col-xs-10 col-lg-offset-4 col-md-offset-2 col-sm-offset-2 col-xs-offset-1 wizard panel-wizard">
+  
+  <div class="panel panel-default " ng-show="switcher == 1 ">
+    <div class="panel-body">
+      <p class="monster">
+        <img src="images/whatsapp.png" height="50" alt="">
+       {{'QWHATSAPP' | translate }}</p>
+      <input type="text" ng-model="whatsapp" class="form-control" placeholder="{{ 'MWHATSAPP' | translate }}">
+    </div>
+    <button class="btn btn-danger btn-panel btn-wizard" ng-click="next()">{{ 'NEXT' | translate }}</button>
+  </div>
+  
+  <div class="panel panel-default" ng-show="switcher == 2 ">
+    <div class="panel-body">
+      <p class="monster">
+        <img src="images/viber.webp" height="50" alt="">
+        {{'QVIBER' | translate }}
+      </p>
+      <input type="text" ng-model="viber" class="form-control" placeholder="{{ 'MVIBER' | translate }}">
+    </div>
+    <button class="btn btn-danger btn-panel btn-wizard" ng-click="next()">{{ 'NEXT' | translate }}</button>
+  </div>
+  
+  <div class="panel panel-default" ng-show="switcher == 3 ">
+    <div class="panel-body">
+      <p class="monster">
+        <img src="images/skype.gif" alt="" height="50">{{ 'QSKYPE' | translate }}</p>
+      <input type="text" ng-model="skype" class="form-control" placeholder="{{ 'MSKYPE' | translate }}">
+    </div>
+    <button class="btn btn-danger btn-panel btn-wizard" ng-click="save()">{{ 'SAVE' | translate }}</button>
+  </div>
+
+</div>

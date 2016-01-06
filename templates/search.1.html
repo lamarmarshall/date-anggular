@@ -1,0 +1,54 @@
+  <div class="col-lg-4 col-md-8 col-sm-12 col-xs-12 col-lg-offset-4 col-md-offset-2">
+				
+<div class="col-lg-4 col-md-8 col-sm-12 col-xs-12 col-lg-offset-4 col-md-offset-2 panel-conversation" >
+
+  <div class="panel panel-default " >
+    <div class="panel-body">
+      <p class="monster"> Age</p>
+      <form class="form-inline" role="form">
+      <div class="form-group">
+      <label for="email">Between:</label>
+      <select class="form-control ">
+        <option ng-repeat="n in [] | range:100" value={{n}}  ng-selected="n == 18">{{n}}</option>
+      </select>
+      </div>
+      <div class="form-group">
+      <label for="email">and</label>
+      <select class="form-control" id="to" >
+        <option ng-repeat="n in [] | range:100" value={{n}}  ng-selected="n == 65">{{n}}</option>
+        
+      </select>
+      </div>
+      </form>
+      <hr/>
+      
+       <p class="monster"> Country</p>
+   
+      <div class="form-group">
+      <label for="country">Country</label>
+      <select class="form-control ">
+        <option ng-repeat="(k,v ) in countries" value={{k}}> {{ v}}</option>
+      </select>
+      </div>
+      <hr/>
+      <p class="monster">Gender</p>
+   
+      <div class="form-group">
+      <label for="country">Gender</label>
+      <select class="form-control ">
+        <option value="USA">Male</option>
+        <option value="USA">Female</option>
+        <option value="USA">Transgender</option>
+      </select>
+      </div>
+      <hr/>
+   
+	     <button class="btn btn-danger btn-panel">Search</button>
+	
+    </div>
+   
+  </div>
+  
+ 
+
+</div>

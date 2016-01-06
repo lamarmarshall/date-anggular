@@ -1,0 +1,57 @@
+  <div class="col-lg-4 col-md-8 col-sm-12 col-xs-12 col-lg-offset-4 col-md-offset-2">
+				<p>
+				<img src="images/girl_model.png" class="model-top">
+				</p>
+				</div>
+<div class="col-lg-4 col-md-8 col-sm-12 col-xs-12 col-lg-offset-4 col-md-offset-2 panel-wizard" >
+
+  <div class="panel panel-default " >
+    <div class="panel-body">
+      <p class="monster"> {{ 'AGE' | translate }}</p>
+      <form class="form-inline" role="form">
+      <div class="form-group">
+      <label for="email">{{ 'BETWEEN' | translate}}</label>
+      <select class="form-control ">
+        <option ng-repeat="n in [] | range:100" value={{n}}  ng-selected="n == 18">{{n}}</option>
+      </select>
+      </div>
+      <div class="form-group">
+      <label for="email">{{ 'AND' | translate}}</label>
+      <select class="form-control" id="to" >
+        <option ng-repeat="n in [] | range:100" value={{n}}  ng-selected="n == 65">{{n}}</option>
+        
+      </select>
+      </div>
+      </form>
+      <hr/>
+      
+       <p class="monster"> {{ 'COUNTRY' | translate}}</p>
+   
+      <div class="form-group">
+      <label for="country">{{ 'COUNTRY' | translate}}</label>
+      <select class="" ">
+        <option ng-repeat="(k,v ) in countries" value={{k}}> {{ v}}</option>
+      </select>
+      </div>
+      <hr/>
+      <p class="monster">{{ 'GENDER' | translate}}</p>
+   
+      <div class="form-group">
+      <label for="country">{{ 'GENDER' | translate}}</label>
+      <select class="">
+        <option value="USA">{{ 'MALE' | translate}}</option>
+        <option value="USA">{{ 'FEMALE' | translate}}</option>
+   
+      </select>
+      </div>
+      <hr/>
+   
+	     <button class="btn btn-danger btn-panel"><i class="fa fa-search fa-2x"></i></button>
+	
+    </div>
+   
+  </div>
+  
+ 
+
+</div>

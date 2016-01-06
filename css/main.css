@@ -1,0 +1,122 @@
+
+body{
+	background: whitesmoke;
+}
+.white{
+	background: white;
+	padding:20px 20px 30px 30px;
+}	
+.hero{
+	min-height: 475px;
+	width: 100%;
+	background: red;
+	margin-top: -25px;
+	overflow-y: hidden;
+}
+.ng-invalid     {  
+	border-color: red;
+}
+.ng-valid     {  
+	border-color: green;
+}
+.ng-pristine    {
+	background: white;
+  }
+
+
+.navbar-inverse{
+	background: #212121;
+}
+
+.login-signup{
+	min-height:  250px;
+}
+
+.panel-login-signup{
+	margin-top: 15px;
+	padding: 10px 10px 10px 10px;
+}
+.model{
+	height: 450px;
+}
+
+.btn-top{
+	margin-left: 25px;
+	margin-top: 7px;
+}
+
+.btn-panel{
+	width: 100%;
+	margin-bottom: 30px;
+}
+
+#loginform{
+	margin-top: 100px;
+}
+
+.btn-wizard{
+	margin-top: 70px;
+}
+
+
+
+p.monster{
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 25px;
+}
+
+.panel-wizard{
+	paddding: 10px 10px 10px 10px;
+}
+.wizard{
+	margin-top: 175px;
+}
+
+select.from-age{
+	width: 200px;
+}
+.toast1{
+	top: 100px;
+	right: 100px;
+}
+.model-top{
+	height: 200px;
+	margin-top: -5px;
+	margin-bottom: -50px;
+}
+
+.actionbar h4{
+	color: white;
+}
+
+i{
+	margin-left: 10px;
+}
+.panel-conversation{
+	height: 600px;	
+}
+.panel-footer{
+	width: 100%;
+	position: absolute;
+	bottom: 0px;
+	left:0px;
+}
+
+select{
+	background: gray;
+	width: 100%;
+	color: white;
+	padding: 10px 10px 10px 10px;
+}
+
+.panel-footer button{
+	margin-top: 10px;
+}
+
+.panel-footer textarea {
+	width:90%;
+	margin-left: 5%;
+  overflow-y: scroll;
+  border: 2px solid gray;
+  padding: 10px 10px 10px 10px;
+}
