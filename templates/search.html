@@ -1,11 +1,29 @@
-  <div class="col-lg-4 col-md-8 col-sm-12 col-xs-12 col-lg-offset-4 col-md-offset-2">
+ <div class="row">
+  <div class="col-lg-3 col-md-8 col-sm-12 col-lg-offset-2 col-md-offset-2 hidden-xs">
 				<p>
-				<img src="images/girl_model.png" class="model-top">
+				<img src="images/girl_model.png" class="model-top img-responsive">
 				</p>
 				</div>
-<div class="col-lg-4 col-md-8 col-sm-12 col-xs-12 col-lg-offset-4 col-md-offset-2 panel-wizard" >
+</div>
 
-  <div class="panel panel-default " >
+<div class="col-lg-3 col-md-4 col-sm-4 col-xs-12 col-lg-offset-2 col-md-offset-2 panel-wizard" >
+
+  <div class="panel panel-default "  >
+    <div class="panel-heading" style="background: #c62828; color: white;" ng-init="isCollapsed = false" ng-click="isCollapsed = !isCollapsed" >
+      
+      <a class="box" style="background: #c62828; color: white;"  >
+      
+      {{ 'SEARCH' | translate }}
+   
+      </a>
+      
+      
+      <i class="fa fa-minus pull-right"></i>
+      <i class="fa fa-plus pull-right"></i>
+    </div>
+    
+    <div  uib-collapse="isCollapsed">
+    
     <div class="panel-body">
       <p class="monster"> {{ 'AGE' | translate }}</p>
       <form class="form-inline" role="form">
@@ -29,8 +47,10 @@
    
       <div class="form-group">
       <label for="country">{{ 'COUNTRY' | translate}}</label>
-      <select class="" ">
-        <option ng-repeat="(k,v ) in countries" value={{k}}> {{ v}}</option>
+      <select  ng-model="location" class="pais">
+        <option value="" disabled selected>{{ 'QCOUNTRY' | translate }}</option>
+        <option value="ANY" >{{ "ANYCOUNTRY" | translate }}</option>
+        <option ng-repeat="(k,v ) in countries" value={{k}} > {{v}}</option>
       </select>
       </div>
       <hr/>
@@ -38,15 +58,70 @@
    
       <div class="form-group">
       <label for="country">{{ 'GENDER' | translate}}</label>
-      <select class="">
-        <option value="USA">{{ 'MALE' | translate}}</option>
-        <option value="USA">{{ 'FEMALE' | translate}}</option>
+      <select class="pais" ng-model="gender">
+        <option value="" disabled selected>{{ 'GENDER' | translate }}</option>
+        <option value="MALE">{{ 'MALE' | translate}}</option>
+        <option value="FEMALE">{{ 'FEMALE' | translate}}</option>
    
       </select>
       </div>
       <hr/>
    
-	     <button class="btn btn-danger btn-panel"><i class="fa fa-search fa-2x"></i></button>
+	     <button class="btn btn-danger btn-panel glow " ng-click="onClick();"  ><i class="fa fa-search fa-2x" ></i></button>
+	</div>
+    </div>
+   
+  </div>
+  
+ 
+
+</div>
+
+<!- results panel ->
+
+<div class="col-lg-6 col-md-6 col-sm-8 col-xs-12 panel-wizard" >
+
+  <div class="panel panel-default "  >
+    <div class="panel-heading">
+      {{ 'SEARCHRESULTS' | translate}}
+    </div>
+      <div class="panel-body">
+     
+      <ul class="list-group">
+        <li class="list-group-item" ng-repeat="result in results" frame="{{$index}}"> 
+          
+          <div class="result-pic">
+          <img src="" alt="" height="100" width="100" />
+          </div>
+          
+          <div class="result-text">
+            <p>{{ 'USERNAME'| translate }} : {{ result.username}}</p>
+            <p>{{ "AGE" | translate}}: {{ result.age }}</p>
+            <p>{{ "GENDER" | translate }}: {{ result.gender | translate }}</p>
+           <div ng-if="result.location != 'USA' ">
+             <p>{{ "LOCATION" | translate }}: {{ result.location | translate }}</p>
+           </div>
+           <div ng-if="result.location == 'USA' ">
+             <p>{{ "LOCATION" | translate }}: {{ result.location+"DOM" | translate }}</p>
+           </div>
+           <div>
+             <button class="btn btn-success">send</button>
+           </div>
+           <div class="pull-right">
+             <i class="fa fa-star-o glow-text">{{ 'FAVORITE' | translate }}</i>
+           </div>
+           <div class="pull-right glow" ng-click="onContacts($index);" ng-hide="$index == idx ">
+             <img src="images/whatsapp.png"  height="30" width="30">
+             <img src="images/viber.webp"  height="30" width="30">
+             <img src="images/skype.gif"  height="30" width="30">
+           </div>
+            
+          </div>
+        </li>
+      </ul>
+      
+  </div>
+
 	
     </div>
    

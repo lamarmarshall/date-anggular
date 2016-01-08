@@ -62,7 +62,7 @@ body{
 
 p.monster{
 	font-family: Arial, Helvetica, sans-serif;
-	font-size: 25px;
+	font-size: 20px;
 }
 
 .panel-wizard{
@@ -102,7 +102,7 @@ i{
 	left:0px;
 }
 
-select{
+select.pais{
 	background: gray;
 	width: 100%;
 	color: white;
@@ -119,4 +119,58 @@ select{
   overflow-y: scroll;
   border: 2px solid gray;
   padding: 10px 10px 10px 10px;
+}
+.result-pic{
+	float:left;
+	margin-right:  20px;
+}
+.result-text{
+	
+	margin-left:  20px;
+}
+
+
+.result-text img{
+	margin-top: -16px;
+	float: left;
+}
+.result-text i{
+	margin-top: -135px;
+	float: left;
+}
+
+.box {
+  width:80px;
+  height:80px;
+  background:gray;
+  animation:pulse 0.5s infinite alternate;
+  padding: 10px 10px 10px 10px;
+}
+
+@keyframes pulse {
+  from { box-shadow:0px 0px 10px 3px whitesmoke; }
+  to { box-shadow:0px 0px 50px 5px whitesmoke; }
+}
+@keyframes pulseyellow {
+  from { box-shadow:0px 0px 10px 3px orangered; }
+  to { box-shadow:0px 0px 50px 5px orangered; }
+}
+@keyframes pulseyellowtext {
+  from {  text-shadow: 0px 0px 5px orangered; }
+  to { text-shadow: 0px 0px 15px  orangered; }
+}
+
+.glow{
+	animation:pulseyellow 0.5s infinite alternate;
+}
+
+.glow-text{
+	animation:pulseyellowtext 0.5s infinite alternate;
+}
+.list-group-item{
+	opacity: 1;
+	 transition-property: opacity ;
+  transition-duration: .8s;
+ 
+   transition-timing-function: ease-out;
 }

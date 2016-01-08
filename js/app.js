@@ -24,7 +24,30 @@
     "MESSAGES" : "Messages",
     "LOCATION" : "location",
     "TIMESTAMP" : "Time Stamp",
-    "DELETE" : "Delete"
+    "DELETE" : "Delete",
+    "SEARCHRESULTS": "Search Results",
+    "SEARCH" : "Search",
+    "QCOUNTRY" : "Choose country ...",
+    "ANYCOUNTRY" : "Any and All",
+        'USA' : "UNITED STATES",
+      'FR' : "FRANCE",
+      'UK' : "UNITED KINDOM",
+      'DR' : "DOMINICAN REPUBLIC",
+      'PR' : "PUERTO RICO",
+      'GR' : "GERMANY",
+      'CA' : "CANADA",
+      'IT' : "ITALY",
+      'SP' : "SPAIN",
+      'PT' : "PORTUGAL",
+      'BR' : "BRAZIL",
+      'CS' : "COSTA RICA",
+      'MX' : "MEXICO",
+      'CO' : "COLOMBIA",
+      'CU' : "CUBA",
+      'CONTACTSREQ' : "Request for Contact info Sent! ",
+      'CONTACSREQHEAD' : "Info requested",
+      'FAVORITE' : "Favorite",
+      "MAIL" : "Mail"
   };
   
   var espanol = {
@@ -35,7 +58,7 @@
     "PASSWORD" : "Contraseña ",
     "EMAILADDRESS" : "Correo",
     "AGE" : "Edad",
-    "GENDER" : "Homber o Mujer?",
+    "GENDER" : "Hombre o Mujer?",
     "MALE" : "Hombre",
     "FEMALE" : "Mujer",
     "QWHATSAPP" : "Tienes Whatsapp?",
@@ -52,9 +75,34 @@
      "MESSAGES" : "Mensajes",
     "LOCATION" : "Ubicación",
     "TIMESTAMP" : "Fecha",
-    "DELETE" : "Borrar"
+    "DELETE" : "Borrar",
+    "SEARCHRESULTS": "Resultados",
+    "SEARCH" : "Buscar",
+    "QCOUNTRY" : "Elije pais ...",
+    "ANYCOUNTRY" : "Qualquier paises",
+     'USA' : "ESTADOS UNIDOS",
+     'USADOM' : "ESTADOS UNIDOS / (new york)",
+      'FR' : "FRANCE",
+      'UK' : "UNITED KINDOM",
+      'DR' : "REPUBILCA DOMINICANA",
+      'PR' : "PUERTO RICO",
+      'GR' : "GERMANY",
+      'CA' : "CANADA",
+      'IT' : "ITALY",
+      'SP' : "SPAIN",
+      'PT' : "PORTUGAL",
+      'BR' : "BRAZIL",
+      'CS' : "COSTA RICA",
+      'MX' : "MEXICO",
+      'CO' : "COLOMBIA",
+      'CU' : "CUBA",
+      'CONTACTSREQ' : "los contactos  pedido",
+      'CONTACSREQHEAD' : "info pedido",
+      'FAVORITE' : "Favorito",
+      "MAIL" : "Correo"
+   
   };
-  var app = angular.module("Date", ['ui.router', 'ngSanitize', 'toastr' , 'pascalprecht.translate'] );
+  var app = angular.module("Date", ['ui.router','toastr' , 'pascalprecht.translate', 'ui.bootstrap' ]);
   
   app.config(function(toastrConfig) {
   angular.extend(toastrConfig, {
@@ -76,7 +124,11 @@ app.config(['$translateProvider', function ($translateProvider) {
 }]);
 
 app.controller('Navbar', function($scope, $translate){
-   
+   $scope.dynamicPopover = {
+    content: 'Hello, World!',
+    templateUrl: 'myPopoverTemplate.html',
+    title: 'Title'
+  };
     $translate.use("es");
   
   Parse.initialize("eTSR27OWlKZsPlg8JBmDxLBVUiuw0A6qLe1yJwHK", "C7aQYWGQstNvi0F1yBYMrF82tM2gNkG0slF4cy3g");
@@ -91,13 +143,14 @@ if (currentUser) {
 
 });
   
-  app.controller("Wizard", function($scope, toastr){
+  app.controller("Wizard", function($scope, toastr, $location){
     $scope.WHATSAPP = 1; 
     $scope.VIBER = 2; 
     $scope.SKYPE = 3;
     $scope.whatsapp = "";
     $scope.viber = "";
     $scope.skype = "";
+    $scope.isDisabled = false;
     
     $scope.switcher = 1; 
     
@@ -109,6 +162,7 @@ if (currentUser) {
     }
     
     $scope.save = function(){
+      $scope.isDisabled = true;
       console.log($scope.whatsapp+"   "+$scope.viber+"  "+$scope.skype);
       
        Parse.initialize("eTSR27OWlKZsPlg8JBmDxLBVUiuw0A6qLe1yJwHK", "C7aQYWGQstNvi0F1yBYMrF82tM2gNkG0slF4cy3g");
@@ -131,6 +185,8 @@ if (currentUser) {
           }
         });
       toastr.success("Saved", "save social");
+      $scope.$apply();
+      $location.path("/dashboard");
       
     };
     
@@ -179,9 +235,98 @@ if (currentUser) {
 
 
   
-  app.controller('Search', function($scope, Countries){
+  app.controller('Search', function($scope, Countries, $modal, toastr, $translate, $q, $document){
    $scope.countries = Countries;
+   $scope.isCollapsed = false;
+  $scope.idx = "100";
+   var chosen = [];
+   $scope.loadLang = function(){
+     var deferred = $q.defer();
+           $translate('CONTACTSREQ').then(function (contacts) {
+              $scope.contactsreq = contacts;
+              deferred.notify("contacts set");
+            });
+            $translate('CONTACTSREQHEAD').then(function (contacts) {
+              $scope.contactsreqhead = contacts;
+              deferred.notify("contacts set");
+            });
+             deferred.resolve();
+       return deferred.promise;
+   }
+   $scope.onContacts = function(ind){
+     chosen.push(ind);
+   
+     $scope.idx = ind;
+     el = document.querySelector('[frame="'+ind+'"]');
+     el.addEventListener("transitionend", function(name1){
+       console.log(name1);
+        document.querySelector('[frame="'+ind+'"]').style.display = "none";
+     }, true);
+    document.querySelector('[frame="'+ind+'"]').style.opacity = 0;
+   
+    
+    $scope.loadLang().then(function(){
+      toastr.success($scope.contactsreq, $scope.contactsreqhead);
+    }
+    
+    );
+    
+     
+   }
+   
+   $scope.onClick = function(){
+     $scope.isCollapsed =  false; 
+     if(window.screen.width < 376){
+       $scope.isCollapsed = !$scope.isCollapsed;
+       
+     }else{
+       $scope.isCollapsed =  false; 
+     }
+     
+     Parse.initialize("eTSR27OWlKZsPlg8JBmDxLBVUiuw0A6qLe1yJwHK", "C7aQYWGQstNvi0F1yBYMrF82tM2gNkG0slF4cy3g");
+  
+    var Profile = Parse.Object.extend("Profile");
+   
+    var query = new Parse.Query(Profile);
+    if($scope.location == "ANY"){
+  
+    }else{
+       if($scope.gender){
+            console.log("gender set "+$scope.gender);
+            query.equalTo("gender", $scope.gender)
+          }
+          if($scope.location){
+            console.log("location set "+$scope.location);
+            query.equalTo("location", $scope.location);
+          }
+    }
+    
+    
+
+    
+
+     
+      query.find({
+        success: function(women) {
+          console.log("queried");
+          var rs = [];
+          for(var i = 0; i < women.length; i++)
+          {
+            console.log(women)
+            p = JSON.parse(JSON.stringify(women[i])); // weird
+            rs.push(p);
+          }
+         $scope.results = rs;
+         $scope.$apply();
+        }
+      });
+   }
+   
   });
+  
+  app.controller('Popover', function($scope, $translate){
+    $translate.use('es');
+  })
   
   app.controller('Login',['$scope', 'toastr', '$location', function($scope, toastr, $location){
     $scope.onSubmit = function(valid){
@@ -194,7 +339,7 @@ if (currentUser) {
                 success: function(user) {
                   
                   toastr.success('successful login', 'Login',{closeButton: true});
-                  window.location.reload();
+                  $scope.apply()
                   
                 },
                 error: function(user, error) {
@@ -209,9 +354,9 @@ if (currentUser) {
     
   }]);
   
-  app.controller("Register", function($scope, toastr, $location){
+  app.controller("Register", function($scope, toastr, $location, Countries){
     $scope.disabled = false;
-    
+    $scope.countries = Countries;
       $scope.onSubmit = function(isValid){
        Parse.initialize("eTSR27OWlKZsPlg8JBmDxLBVUiuw0A6qLe1yJwHK", "C7aQYWGQstNvi0F1yBYMrF82tM2gNkG0slF4cy3g");
        $scope.disabled = true;
@@ -219,26 +364,34 @@ if (currentUser) {
           Parse.User.logOut();
             
             var user = new Parse.User();
+            var custom_acl2 = new Parse.ACL();
+            custom_acl2.setPublicReadAccess(true);
+            user.setACL(custom_acl2);
             user.set("username", $scope.username);
             user.set("password", $scope.pwr);
             user.set("email", $scope.email);
             
-            var Profile = Parse.Object.extend("Profile");
-            
-            var prof = new Profile();
-            var profACL = new Parse.ACL(Parse.User.current());
-            profACL.setPublicReadAccess(true);
-            prof.setACL(profACL);
-            prof.set("gender", $scope.gender);
-            prof.set("age", $scope.age);
+           
             
             
             user.signUp(null, {
               success: function(user) {
-                // Hooray! Let them use the app now.
+                 var Profile = Parse.Object.extend("Profile");
+            var custom_acl = new Parse.ACL();
+            // give write access to the current user
+            custom_acl.setWriteAccess( Parse.User.current(), true);
+            // disable public read access
+            custom_acl.setPublicReadAccess(true);
+                        
+            var prof = new Profile();
+            prof.setACL(custom_acl);
+            prof.set("username",  Parse.User.current().get("username") );
+            prof.set("location", $scope.location);
+            prof.set("gender", $scope.gender);
+            prof.set("age", $scope.age);
                 prof.set("user", Parse.User.current());
                 
-                prof.setACL(new Parse.ACL(Parse.User.current()));
+                
                 prof.save()
                 toastr.success('successful sign up', 'Sign Up',{closeButton: true});
                 $location.path("/wizard");
@@ -270,8 +423,8 @@ app.controller("Conversation", function($scope, $stateParams) {
      $scope.convoid = $stateParams.convoid;
   });
   
-app.controller("Dashboard", function($scope){
-  
+app.controller("Dashboard", function($scope, $modal){
+  var myModal = $modal({title: 'My Title', content: 'My Content', show: true});
 });
 
 app.config(function($stateProvider, $urlRouterProvider) {
@@ -325,7 +478,7 @@ app.config(function($stateProvider, $urlRouterProvider) {
       controller: "Conversation"
     })
     .state('dashboard', {
-      url: "dashboard",
+      url: "/dashboard",
       templateUrl: "templates/dashboard.html",
       controller: "Dashboard"
     })
