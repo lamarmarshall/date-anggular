@@ -5,7 +5,7 @@
 	<meta charset="UTF-8">
 	<title>Date Site</title>
 	
-	<link href="css/bootstrap.min.css" rel="stylesheet" >
+	<link href="bower_components/bootstrap/dist/css/bootstrap.min.1.css" rel="stylesheet" >
 	<link rel="stylesheet" href="css/main.css">
 	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular.min.js"></script>
 	
@@ -18,13 +18,15 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.14.3/ui-bootstrap.min.js"></script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.14.3/ui-bootstrap-tpls.min.js"></script>
+<script src="bower_components/spin.js/spin.js"></script>
+<script src="bower_components/angular-spinner/angular-spinner.js"></script>
 
-<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha256-3dkvEK0WLHRJ7/Csr0BZjAWxERc5WH7bdeUya2aXxdU= sha512-+L4yy6FRcDGbXJ9mPG8MT/3UCDzwR9gPeyFNMCtInsol++5m3bk2bXWKdZjvybmohrAsn3Ua5x8gfLnbE1YkOg==" crossorigin="anonymous">
+<link href="bower_components/font-awesome/css/font-awesome.min.css" rel="stylesheet">
 	<script src="//www.parsecdn.com/js/parse-1.6.12.min.js"></script>
 	<script src="js/angular-translate.min.js"></script>
 	
 </head>
-<body ng-controller="Navbar">
+<body ng-controller="Navbar" ng-click="close()">
 	<nav class="navbar navbar-default navbar-inverse" >
   <div class="container-fluid">
     <div class="navbar-header">
@@ -45,7 +47,9 @@
 				<a ui-sref="mail">
 				<i class="fa fa-envelope-o fa-3x"></i>
 				</a>
+				<a ui-sref="dashboard">
 				<i class="fa fa-tachometer fa-3x"></i>
+				</a>
 				
 				 <script type="text/ng-template" id="myPopoverTemplate.html" >
 				<div >
@@ -62,6 +66,12 @@
 				 </div>
 				 <hr/>
 				 
+				 <div >
+				 <p style="text-align: center;">
+				 <a ui-sref="dashboard"><i class="fa fa-tachometer  fa-2x" ></i>{{ 'DASHBOARD' | translate }}</a>
+				 </p>
+				 </div>
+				 <hr/>
 				 <!--
 					<a ui-sref="mail">{{ 'MAIL' | translated }}</a>
 					<a ui-sref="search">{{ 'SEARCH' | translated }}</a>
@@ -70,7 +80,7 @@
     			</script>
 				
 				<button popover-placement="bottom"  type="button" style="background: transparent;border-color: transparent;" 
-				uib-popover-template="dynamicPopover.templateUrl">
+				uib-popover-template="dynamicPopover.templateUrl" popover-is-open="popov">
 					<i class="fa fa-bars fa-3x" style="color: white"> </i>
 				</button>
 				<p>

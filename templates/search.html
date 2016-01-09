@@ -7,7 +7,7 @@
 </div>
 
 <div class="col-lg-3 col-md-4 col-sm-4 col-xs-12 col-lg-offset-2 col-md-offset-2 panel-wizard" >
-
+<span us-spinner="{radius:30, width:8, length: 16}" spinner-on="showSpinner"></span>
   <div class="panel panel-default "  >
     <div class="panel-heading" style="background: #c62828; color: white;" ng-init="isCollapsed = false" ng-click="isCollapsed = !isCollapsed" >
       
@@ -67,7 +67,7 @@
       </div>
       <hr/>
    
-	     <button class="btn btn-danger btn-panel glow " ng-click="onClick();"  ><i class="fa fa-search fa-2x" ></i></button>
+	     <button class="btn btn-danger btn-panel glow " ng-click="onClick();"  ng-disabled="disableSearch"><i class="fa fa-search fa-2x" ></i></button>
 	</div>
     </div>
    
@@ -80,6 +80,7 @@
 <!- results panel ->
 
 <div class="col-lg-6 col-md-6 col-sm-8 col-xs-12 panel-wizard" >
+  
 
   <div class="panel panel-default "  >
     <div class="panel-heading">
@@ -105,10 +106,10 @@
              <p>{{ "LOCATION" | translate }}: {{ result.location+"DOM" | translate }}</p>
            </div>
            <div>
-             <button class="btn btn-success">send</button>
+             <button  class="btn btn-success" ui-sref="conversation({convoid: '123'})">send</button>
            </div>
            <div class="pull-right">
-             <i class="fa fa-star-o glow-text">{{ 'FAVORITE' | translate }}</i>
+             <i class="fa fa-star-o glow-text" ng-click="onFavorite()">{{ 'FAVORITE' | translate }}</i>
            </div>
            <div class="pull-right glow" ng-click="onContacts($index);" ng-hide="$index == idx ">
              <img src="images/whatsapp.png"  height="30" width="30">

@@ -6,6 +6,10 @@ body{
 	background: white;
 	padding:20px 20px 30px 30px;
 }	
+.white1{
+	background: white;
+	
+}	
 .hero{
 	min-height: 475px;
 	width: 100%;
@@ -95,12 +99,13 @@ i{
 .panel-conversation{
 	height: 600px;	
 }
+/*
 .panel-footer{
 	width: 100%;
 	position: absolute;
 	bottom: 0px;
 	left:0px;
-}
+}*/
 
 select.pais{
 	background: gray;
@@ -173,4 +178,35 @@ select.pais{
   transition-duration: .8s;
  
    transition-timing-function: ease-out;
+}
+
+.me{
+	background: #e0f2f1 ;
+	color: #212121;;
+	padding: 15px 15px 15px 15px;
+}
+.you{
+	background: #f0f4c3 ;
+	color: #212121;;
+	padding: 15px 15px 15px 15px;
+}
+
+.me button{
+	display: none;
+}
+
+#chat{
+	
+	height: 400px;
+}
+
+.chatbox{
+	background-image: url("/images/paisley.png");
+	background-repeat: repeat;
+	overflow-y: auto;
+	height: 400px;
+}
+
+.chatbox:last-child{
+	margin-bottom: 55px;
 }

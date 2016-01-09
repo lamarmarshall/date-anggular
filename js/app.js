@@ -47,7 +47,16 @@
       'CONTACTSREQ' : "Request for Contact info Sent! ",
       'CONTACSREQHEAD' : "Info requested",
       'FAVORITE' : "Favorite",
-      "MAIL" : "Mail"
+      "MAIL" : "Mail",
+      'CONVERSATIONTEXTAREA': "Chat",
+      'HEADCONVERSATION': "Type your message",
+      'SEND' : "Send",
+      'TRANSLATE' : "Translate",
+      'TRANSLATION' : "Translation",
+      'SAMELANGUAGE' : "ERROR: it is in english",
+      'SETUPCHANGE' : "Set up whatsapp, viber and/or skype",
+      'CONTACTS' : "Contacts",
+      'CHANGEPASSWORD' : "Change Password"
   };
   
   var espanol = {
@@ -99,10 +108,26 @@
       'CONTACTSREQ' : "los contactos  pedido",
       'CONTACSREQHEAD' : "info pedido",
       'FAVORITE' : "Favorito",
-      "MAIL" : "Correo"
+      "MAIL" : "Correo",
+      'CONVERSATIONTEXTAREA': "Tecla mensaje",
+      'HEADCONVERSATION': "Platico",
+      'SEND': 'Enviar',
+      'TRANSLATE' : "Traducir",
+      'TRANSLATION' : " traducción:",
+      'SAMELANGUAGE' : "ERROR: ya español",
+      'SETUPCHANGE' : "Configurar whatsapp, viber o skype",
+      'CONTACTS' : "Contactos",
+      "CHANGEPASSWORD" : "Cambiar Contraseña"
    
   };
-  var app = angular.module("Date", ['ui.router','toastr' , 'pascalprecht.translate', 'ui.bootstrap' ]);
+  var Lang = {};
+  var languages = {};
+   Lang['english'] = english;
+   Lang['espanol'] = espanol;
+   languages['es'] = "espanol";
+   languages['en'] = "english";
+  
+  var app = angular.module("Date", ['ui.router','toastr' , 'pascalprecht.translate', 'ui.bootstrap' ,'angularSpinner' ]);
   
   app.config(function(toastrConfig) {
   angular.extend(toastrConfig, {
@@ -129,6 +154,12 @@ app.controller('Navbar', function($scope, $translate){
     templateUrl: 'myPopoverTemplate.html',
     title: 'Title'
   };
+ 
+  
+  $scope.close = function(){
+     $scope.popov = false;
+  }
+ 
     $translate.use("es");
   
   Parse.initialize("eTSR27OWlKZsPlg8JBmDxLBVUiuw0A6qLe1yJwHK", "C7aQYWGQstNvi0F1yBYMrF82tM2gNkG0slF4cy3g");
@@ -235,11 +266,13 @@ if (currentUser) {
 
 
   
-  app.controller('Search', function($scope, Countries, $modal, toastr, $translate, $q, $document){
+  app.controller('Search', function($scope, Countries,  toastr, $translate, $q, $document){
+     $scope.disableSearch = false;
    $scope.countries = Countries;
    $scope.isCollapsed = false;
   $scope.idx = "100";
    var chosen = [];
+    $scope.showSpinner = false;
    $scope.loadLang = function(){
      var deferred = $q.defer();
            $translate('CONTACTSREQ').then(function (contacts) {
@@ -253,6 +286,7 @@ if (currentUser) {
              deferred.resolve();
        return deferred.promise;
    }
+   
    $scope.onContacts = function(ind){
      chosen.push(ind);
    
@@ -273,9 +307,18 @@ if (currentUser) {
     
      
    }
+   $scope.onFavorite = function(){
+     console.log("fav");
+   }
+   $scope.onSend = function(){
+     console.log("send");
+   }
+   
    
    $scope.onClick = function(){
+     $scope.disableSearch = true;
      $scope.isCollapsed =  false; 
+      $scope.showSpinner = true;
      if(window.screen.width < 376){
        $scope.isCollapsed = !$scope.isCollapsed;
        
@@ -289,7 +332,12 @@ if (currentUser) {
    
     var query = new Parse.Query(Profile);
     if($scope.location == "ANY"){
-  
+      
+           if($scope.gender){
+            console.log("gender set "+$scope.gender);
+            query.equalTo("gender", $scope.gender)
+          }
+         
     }else{
        if($scope.gender){
             console.log("gender set "+$scope.gender);
@@ -317,7 +365,9 @@ if (currentUser) {
             rs.push(p);
           }
          $scope.results = rs;
+         $scope.showSpinner = false;
          $scope.$apply();
+         
         }
       });
    }
@@ -419,12 +469,129 @@ app.controller("Logout", function($scope, $location){
 app.controller("Mail", function(){
   
 });
-app.controller("Conversation", function($scope, $stateParams) {
+
+
+app.controller("Conversation", function($scope, $stateParams, $translate, $http) {
+  Parse.initialize("eTSR27OWlKZsPlg8JBmDxLBVUiuw0A6qLe1yJwHK", "C7aQYWGQstNvi0F1yBYMrF82tM2gNkG0slF4cy3g");
+    $translate('TRANSLATE').then(function (t) {
+          $scope.translate = t;
+     });
+     $translate('SAMELANGUAGE').then(function (t) {
+          $scope.samelanguage = t;
+     });
      $scope.convoid = $stateParams.convoid;
-  });
+    $scope.userConvo = Parse.User.current().get("username");
+    $scope.spinnerOpen = false;
+    $scope.translationresults = "";
+    $scope.fromlang =  "";
+    //https://www.googleapis.com/language/translate/v2?key=AIzaSyDCAF0_uLnCPNmbGCwVRb2cPa6TvT5m2b8&source=en&target=es&q=eat%20a%20dick
+    //https://www.googleapis.com/language/translate/v2/detect?key=AIzaSyDCAF0_uLnCPNmbGCwVRb2cPa6TvT5m2b8&q=
+    
+     $scope.clear = function(){
+       $scope.textarea = "";
+     }
+     
+     $scope.textareachange = function(event){
+      key = parseInt( event.keyCode);
+        if(key ==13){
+          $scope.update();
+        }
+     }
+     
+     $scope.update = function(){
+       var audio = new Audio('audio/strum.mp3');
+      audio.play()
+       
+       var el = document.getElementById("chat");
+       var els = document.getElementsByClassName("chatbox")[0];
+       var node = document.createElement("P"); 
+       
+       var box  = document.createElement("P");
+       box.className = "white1";
+       var button = document.createElement("BUTTON");
+       button.className ="btn btn-default btn-xs pull-right";
+       var btntext = document.createTextNode($scope.translate)
+       button.appendChild(btntext)
+       box.appendChild(button);
+       
+       node.className = "you"
+       var txtinput = $scope.textarea;
+       var textnode = document.createTextNode(txtinput);
+       node.appendChild(textnode);
+       node.appendChild(box);
+       el.appendChild(node);
+       
+       
+       $scope.clear();
+       els.scrollTop = els.scrollHeight;
+       
+       button.addEventListener('click', function(){
+         $scope.spinnerOpen = true;
+         this.setAttribute('disabled', 'disabled');
+         var trtxt = Lang[languages[$translate.use()]]['TRANSLATION'];
+         $http({
+            method: 'GET',
+            url: 'https://www.googleapis.com/language/translate/v2/detect?key=AIzaSyDCAF0_uLnCPNmbGCwVRb2cPa6TvT5m2b8&q='+txtinput
+          }).then(function successCallback(response) {
+            $scope.fromlang = response.data.data.detections[0][0].language;
+            var tolang = "es";
+            if($scope.fromlang == $translate.use()){
+              tolang="en";
+              console.log("same language");
+              var para = document.createElement("P");
+                para.className = "white1";
+                var paratxt = document.createTextNode(trtxt);
+                var translation = document.createTextNode( $scope.samelanguage);
+                var br = document.createElement("BR");
+                var bold = document.createElement("B");
+                bold.appendChild(translation);
+                para.appendChild(paratxt);
+                para.appendChild(br);
+                para.appendChild(bold);
+         node.appendChild(para);
+         els.scrollTop = els.scrollHeight; 
+              return;
+            }
+            
+            
+            $http({
+              method: 'GET',
+              url: 'https://www.googleapis.com/language/translate/v2?key=AIzaSyDCAF0_uLnCPNmbGCwVRb2cPa6TvT5m2b8&source='+$scope.fromlang+'&target='+tolang+'&q='+txtinput
+            }).then(function successCallback(response1) {
+                  
+              $scope.translationresults = response1.data.data.translations[0].translatedText;
+              console.log($scope.translationresults);
+              
+                var para = document.createElement("P");
+                para.className = "white1";
+                var paratxt = document.createTextNode(trtxt);
+                var translation = document.createTextNode($scope.translationresults);
+                var br = document.createElement("BR");
+                var bold = document.createElement("B");
+                bold.appendChild(translation);
+                para.appendChild(paratxt);
+                para.appendChild(br);
+                para.appendChild(bold);
+         node.appendChild(para); 
+         els.scrollTop = els.scrollHeight;
+         $scope.spinnerOpen = false;
+        
+              }, function errorCallback(response) {
+                console.error(response);
+              });
+             
+         
+            }, function errorCallback(response) {
+             console.error(response);
+            });
+         
+       });
+      
+     }
+});
+
   
-app.controller("Dashboard", function($scope, $modal){
-  var myModal = $modal({title: 'My Title', content: 'My Content', show: true});
+app.controller("Dashboard", function($scope ){
 });
 
 app.config(function($stateProvider, $urlRouterProvider) {
@@ -473,7 +640,7 @@ app.config(function($stateProvider, $urlRouterProvider) {
       controller: "Mail"
     })
     .state('conversation', {
-      url: "/mail/conversation/:convoid",
+      url: "/conversation/:convoid",
       templateUrl: "templates/conversation.html",
       controller: "Conversation"
     })

@@ -1,19 +1,22 @@
 
-<div class="col-lg-4 col-md-8 col-sm-12 col-xs-12 col-lg-offset-4 col-md-offset-2 panel-wizard" >
+<div class="col-lg-3 col-md-6 col-sm-12 col-xs-12 col-lg-offset-5 col-md-offset-2 panel-wizard" >
 
   <div class="panel panel-default panel-conversation" >
-	  <div class="panel-heading">Panel heading without title</div>
-    <div class="panel-body">
+    <span us-spinner="{radius:30, width:8, length: 16}" spinner-on="spinnerOpen"></span>
+	  <div class="panel-heading">{{ 'HEADCONVERSATION' | translate}}</div>
+    <div class="panel-body chatbox">
       
-   
+      <div id="chat">
+        
+      </div>
 	     
 	
     </div>
 	
    <div class="panel-footer">
-	   <textarea name="" id="" cols="30" rows="3" placeholder="write you message"></textarea>
-	   <button class="btn btn-default btn-panel">
-		   send
+	   <textarea name="textarea" id="textarea" cols="30" rows="2" placeholder="{{ 'CONVERSATIONTEXTAREA' | translate}} {{ userConvo }}" ng-model="textarea" ng-keydown="textareachange($event)"></textarea>
+	   <button class="btn btn-default btn-panel" ng-click="update()">
+		   {{ 'SEND' | translate }}
 	   </button>
 	   
    </div>
