@@ -1,6 +1,23 @@
 
 <div class="col-lg-3 col-md-6 col-sm-12 col-xs-12 col-lg-offset-5 col-md-offset-2 panel-wizard" >
+<div class="greyback2">
 
+  <button popover-placement="bottom"  type="button" style="background: transparent;border-color: transparent;" 
+				uib-popover-template="dynamicPopover.templateUrl" popover-is-open="popov">
+					<i class="fa fa-bars fa-3x" style="color: white"> </i>
+				</button>
+				<a ui-sref="search">
+				<i class="fa fa-search fa-3x"></i>
+				</a>
+				<a ui-sref="mail">
+				<i class="fa fa-envelope-o fa-3x"></i>
+				</a>
+				
+                
+                <a ui-sref="contacts">
+				 <i class="glyphicon glyphicon-user fa-2x"></i>
+                </a>
+ </div>
   <div class="panel panel-default panel-conversation" >
     <span us-spinner="{radius:30, width:8, length: 16}" spinner-on="spinnerOpen"></span>
 	  <div class="panel-heading">{{ 'HEADCONVERSATION' | translate}}</div>

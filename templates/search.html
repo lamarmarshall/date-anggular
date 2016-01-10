@@ -16,10 +16,12 @@
       {{ 'SEARCH' | translate }}
    
       </a>
-      
-      
+     
       <i class="fa fa-minus pull-right"></i>
       <i class="fa fa-plus pull-right"></i>
+       <span id="openmessage" class="pull-right">
+      {{ "OPEN" | translate }}
+      </span>
     </div>
     
     <div  uib-collapse="isCollapsed">
@@ -43,7 +45,7 @@
       </form>
       <hr/>
       
-       <p class="monster"> {{ 'COUNTRY' | translate}}</p>
+    
    
       <div class="form-group">
       <label for="country">{{ 'COUNTRY' | translate}}</label>
@@ -54,11 +56,11 @@
       </select>
       </div>
       <hr/>
-      <p class="monster">{{ 'GENDER' | translate}}</p>
+    
    
       <div class="form-group">
       <label for="country">{{ 'GENDER' | translate}}</label>
-      <select class="pais" ng-model="gender">
+      <select class="pais" ng-model="gen">
         <option value="" disabled selected>{{ 'GENDER' | translate }}</option>
         <option value="MALE">{{ 'MALE' | translate}}</option>
         <option value="FEMALE">{{ 'FEMALE' | translate}}</option>
@@ -89,10 +91,12 @@
       <div class="panel-body">
      
       <ul class="list-group">
-        <li class="list-group-item" ng-repeat="result in results" frame="{{$index}}"> 
+        <li class="list-group-item" ng-repeat="result in results | Gender:gen" frame="{{$index}}"> 
           
           <div class="result-pic">
-          <img src="" alt="" height="100" width="100" />
+              <a ui-sref="profile({ 'username' :  result.username })">
+                <img src="" alt="" height="100" width="100" />
+              </a>
           </div>
           
           <div class="result-text">

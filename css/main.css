@@ -140,7 +140,7 @@ select.pais{
 	float: left;
 }
 .result-text i{
-	margin-top: -135px;
+	margin-top: -145px;
 	float: left;
 }
 
@@ -189,6 +189,8 @@ select.pais{
 	background: #f0f4c3 ;
 	color: #212121;;
 	padding: 15px 15px 15px 15px;
+	opacity:.5;
+	margin-top: 5px;
 }
 
 .me button{
@@ -209,4 +211,40 @@ select.pais{
 
 .chatbox:last-child{
 	margin-bottom: 55px;
+}
+
+.greyback{
+	background-color: gray;
+	color: white;
+	padding: 40px 40px 40px 40px;
+	margin-bottom: 30px;
+}
+.greyback2{
+	background-color: #212121;
+	
+	
+}
+
+.col-xs-4 img{
+	margin-bottom: 10px;
+}
+
+#openmessage{
+    color: white;
+    font-size: 28;
+    margin-right: 55px;
+}
+
+.btnlang:hover{
+    background: red;
+    color: white;
+    font-size: 30px;
+}
+
+.push-down{
+    margin-top: 175px;
+    
+}
+.actionbar{
+    float: right; margin-top: -55px;
 }

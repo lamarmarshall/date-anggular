@@ -18,6 +18,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.14.3/ui-bootstrap.min.js"></script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.14.3/ui-bootstrap-tpls.min.js"></script>
+<script src="bower_components/moment/min/moment.min.js"></script>
 <script src="bower_components/spin.js/spin.js"></script>
 <script src="bower_components/angular-spinner/angular-spinner.js"></script>
 
@@ -26,7 +27,7 @@
 	<script src="js/angular-translate.min.js"></script>
 	
 </head>
-<body ng-controller="Navbar" ng-click="close()">
+<body ng-controller="Navbar" ng-click="close()" ">
 	<nav class="navbar navbar-default navbar-inverse" >
   <div class="container-fluid">
     <div class="navbar-header">
@@ -34,13 +35,15 @@
         Logo
       </a>
 	  
-    </div>
-			<div ng-hide="loggedin">
+    </div >
+			<div ng-hide="loggedin" class="login-btns" >
 				<a class="btn btn-danger pull-right btn-top" ui-sref="register"> {{ "SIGNUP" | translate }}</a>
 				<a class="btn btn-default pull-right btn-top" ui-sref="login">{{ "LOGIN" | translate }}</a>
 			</div>
-			<div ng-show="loggedin" class="actionbar pull-right">
-				<h4>{{user}}</h4>
+            
+            <h4 class="visible-lg visible-md">{{user}}</h4>
+			<div ng-show="loggedin" class="actionbar pull-right" >
+				<h4 class="hidden-lg hidden-md">{{user}}</h4>
 				<a ui-sref="search">
 				<i class="fa fa-search fa-3x"></i>
 				</a>
@@ -85,12 +88,17 @@
 				</button>
 				<p>
 					<a ui-sref="logout">
-					[{{"SIGNOUT" | translate}}]
+					[{{ "SIGNOUT" | translate }}]
 					</a>	
 				</p>
 				
 				
 			</div>
+            <p>
+                    <a ui-sref="language">
+					[{{ "QLANGUAGE" | translate }}]
+					</a>	
+                </p>
   </div>
 </nav>
 	<div ui-view></div>

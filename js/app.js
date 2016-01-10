@@ -56,7 +56,13 @@
       'SAMELANGUAGE' : "ERROR: it is in english",
       'SETUPCHANGE' : "Set up whatsapp, viber and/or skype",
       'CONTACTS' : "Contacts",
-      'CHANGEPASSWORD' : "Change Password"
+      'CHANGEPASSWORD' : "Change Password",
+      "OPEN" : "Toggle",
+      "ENGLISH" : "English",
+      "SPANISH" : "Español",
+      "QLANGUAGE" : "LANG", 
+      "CHANGELANGUAGE" : "Change Language",
+      "USADOM" : "UNITED STATES"
   };
   
   var espanol = {
@@ -117,7 +123,12 @@
       'SAMELANGUAGE' : "ERROR: ya español",
       'SETUPCHANGE' : "Configurar whatsapp, viber o skype",
       'CONTACTS' : "Contactos",
-      "CHANGEPASSWORD" : "Cambiar Contraseña"
+      "CHANGEPASSWORD" : "Cambiar Contraseña",
+      "OPEN" : "abrir",
+      "ENGLISH" : "English",
+      "SPANISH" : "Español",
+      "QLANGUAGE" : "LANG",
+      "CHANGELANGUAGE" : "Cambiar Idioma"
    
   };
   var Lang = {};
@@ -126,9 +137,12 @@
    Lang['espanol'] = espanol;
    languages['es'] = "espanol";
    languages['en'] = "english";
+   
   
-  var app = angular.module("Date", ['ui.router','toastr' , 'pascalprecht.translate', 'ui.bootstrap' ,'angularSpinner' ]);
   
+  var app = angular.module("Date", ['ui.router','toastr' , 'pascalprecht.translate', 'ui.bootstrap' ,'angularSpinner'  ]);
+  
+   
   app.config(function(toastrConfig) {
   angular.extend(toastrConfig, {
     autoDismiss: true,
@@ -148,19 +162,80 @@ app.config(['$translateProvider', function ($translateProvider) {
   $translateProvider.preferredLanguage('en');
 }]);
 
-app.controller('Navbar', function($scope, $translate){
+app.service('Preferance', function(){
+   return {
+       
+       setCookie : function(cname, cvalue, exdays) {
+            var d = new Date();
+            d.setTime(d.getTime() + (exdays*24*60*60*1000));
+            var expires = "expires="+d.toUTCString();
+            document.cookie = cname + "=" + cvalue + "; " + expires;
+        },
+        
+        getCookie: function(cname) {
+            var name = cname + "=";
+            var ca = document.cookie.split(';');
+            for(var i=0; i<ca.length; i++) {
+                var c = ca[i];
+                while (c.charAt(0)==' ') c = c.substring(1);
+                if (c.indexOf(name) == 0) return c.substring(name.length,c.length);
+            }
+            return "";
+        }, 
+         set : function(cname, cvalue) {
+             var exdays = 90;
+            var d = new Date();
+            d.setTime(d.getTime() + (exdays*24*60*60*1000));
+            var expires = "expires="+d.toUTCString();
+            document.cookie = cname + "=" + cvalue + "; " + expires;
+        },
+        get: function(cname) {
+            var name = cname + "=";
+            var ca = document.cookie.split(';');
+            for(var i=0; i<ca.length; i++) {
+                var c = ca[i];
+                while (c.charAt(0)==' ') c = c.substring(1);
+                if (c.indexOf(name) == 0) return c.substring(name.length,c.length);
+            }
+            return "";
+        },
+        exists : function(cname){
+            if(this.get(cname).length < 1){
+                return false;
+            }
+            return true;
+        }
+    } 
+});
+
+app.controller('Navbar', function($scope, $translate, Preferance, BrowserLanguage){
+
+BrowserLanguage.get
+if(Preferance.exists("Language")){
+     $translate.use(Preferance.get("Language"));
+}else{
+    $translate.use(BrowserLanguage.get);
+}
+$scope.$on('changelanguage', function(e, data){
+   $translate.use(data);
+});
    $scope.dynamicPopover = {
     content: 'Hello, World!',
     templateUrl: 'myPopoverTemplate.html',
     title: 'Title'
   };
- 
+ $scope.$on('loggedin', function(event, args) {
+
+    $scope.loggedin = true;
+    console.log("logged in");
+    // do what you want to do
+});
   
   $scope.close = function(){
      $scope.popov = false;
   }
  
-    $translate.use("es");
+ 
   
   Parse.initialize("eTSR27OWlKZsPlg8JBmDxLBVUiuw0A6qLe1yJwHK", "C7aQYWGQstNvi0F1yBYMrF82tM2gNkG0slF4cy3g");
   var currentUser = Parse.User.current();
@@ -192,7 +267,7 @@ if (currentUser) {
       }
     }
     
-    $scope.save = function(){
+    $scope.saveIt = function(){
       $scope.isDisabled = true;
       console.log($scope.whatsapp+"   "+$scope.viber+"  "+$scope.skype);
       
@@ -231,6 +306,54 @@ if (currentUser) {
     }
   });
   
+  app.service("BrowserLanguage", function(){
+      var l = window.navigator.language.split('-');
+      return{
+          get : l[0]
+      } ;
+  });
+  
+  app.service('Cache', function(){
+      return {
+  
+            set : function(key, value){
+            if(localStorage){
+                var d = moment();
+                var obj = {
+                text : JSON.stringify(value),
+                timestamp: d
+                }
+                localStorage.setItem(key, JSON.stringify(obj) );
+            }
+
+            
+            }, 
+            get: function(key){
+            
+                
+                return JSON.parse( JSON.parse( localStorage.getItem(key) ).text );
+                
+                
+            },
+            getTimeStamp: function(key){
+            
+                var ux = JSON.parse( localStorage.getItem(key) ).timestamp ;
+                
+                return   moment().subtract(moment(ux).minutes(), 'minutes').minutes();
+                
+                
+            },
+            exists : function(key){
+                return localStorage.getItem(key) != null;
+
+            },
+            last : function(key){
+                var obj = this.getTimeStamp(key);
+                return obj;
+            }
+        };
+  });
+  
   app.service("Countries", function(){
     return {
       USA: "UNITED STATES",
@@ -263,16 +386,42 @@ if (currentUser) {
     return input;
   };
 });
+app.filter('Gender', function(){
+    return function(input, gen){
+        var res = [];
+     
+           for(var i = 0; i < input.length; i++) {
+             
+               if(input[i].gender == gen){
+                res.push(input[i]);
+            }
+           }
+
+        return res;
+    }
+});
+
+
 
 
   
-  app.controller('Search', function($scope, Countries,  toastr, $translate, $q, $document){
+  app.controller('Search', function($scope, Countries,  toastr, $translate, $q, $document, Cache){
      $scope.disableSearch = false;
    $scope.countries = Countries;
    $scope.isCollapsed = false;
+   $scope.gen = "FEMALE";
   $scope.idx = "100";
    var chosen = [];
     $scope.showSpinner = false;
+    
+    if( Cache.exists("results") ){
+         $scope.results = Cache.get("results");
+         console.log( Cache.last("results") );
+         console.log("from cache");
+         $scope.showSpinner = false;
+        
+     }
+     
    $scope.loadLang = function(){
      var deferred = $q.defer();
            $translate('CONTACTSREQ').then(function (contacts) {
@@ -325,6 +474,27 @@ if (currentUser) {
      }else{
        $scope.isCollapsed =  false; 
      }
+     if( Cache.exists("results") ){
+         var rs = Cache.get("results");
+         /*
+            if($scope.gender){
+             switch($scope.gender){
+                 case  "FEMALE":
+                 rs = rs.filter(filterFemale);
+                 console.log("female");
+                 break;
+                 case "MALE" :
+                 rs = rs.filter(filterMale);
+                 console.log("male");
+                 break;
+             }
+         }*/
+         $scope.results = rs;
+         console.log( Cache.last("results") );
+         console.log("from cache");
+         $scope.showSpinner = false;
+         return;
+     }
      
      Parse.initialize("eTSR27OWlKZsPlg8JBmDxLBVUiuw0A6qLe1yJwHK", "C7aQYWGQstNvi0F1yBYMrF82tM2gNkG0slF4cy3g");
   
@@ -364,6 +534,20 @@ if (currentUser) {
             p = JSON.parse(JSON.stringify(women[i])); // weird
             rs.push(p);
           }
+          Cache.set("results", rs);
+         
+         if($scope.gender){
+             switch($scope.gender){
+                 case  "FEMALE":
+                 rs = rs.filter(filterFemale);
+                 break;
+                 case "MALE" :
+                 rs = rs.filter(filterMale);
+                 break;
+             }
+         }
+         
+         
          $scope.results = rs;
          $scope.showSpinner = false;
          $scope.$apply();
@@ -372,13 +556,30 @@ if (currentUser) {
       });
    }
    
+   var filterFemale = function(input){
+       
+       
+          return input.gender == "FEMALE";
+       
+   }
+   
+      var filterMale = function(input){
+       
+       
+          return input.gender == "MALE";
+       
+   }
+   
   });
   
-  app.controller('Popover', function($scope, $translate){
-    $translate.use('es');
+  app.controller('Popover', function($scope){
+    
   })
   
-  app.controller('Login',['$scope', 'toastr', '$location', function($scope, toastr, $location){
+  app.controller('Login',['$scope', 'toastr', '$location', '$rootScope', function($scope, toastr, $location, $rootScope){
+       $scope.$on("$destroy", function() {
+     
+    });
     $scope.onSubmit = function(valid){
       toastr.clear();
        if(valid){
@@ -389,7 +590,10 @@ if (currentUser) {
                 success: function(user) {
                   
                   toastr.success('successful login', 'Login',{closeButton: true});
-                  $scope.apply()
+                  document.getElementsByClassName("login-btns")[0].style.display = "none";
+                  document.getElementsByClassName("actionbar")[0].style.display = "block";
+                  $location.path("/dashboard");
+                  $rootScope.$broadcast('loggedin', true);
                   
                 },
                 error: function(user, error) {
@@ -401,7 +605,7 @@ if (currentUser) {
           toastr.error('form invalid', 'Error',{closeButton: true});
        }
     }
-    
+   
   }]);
   
   app.controller("Register", function($scope, toastr, $location, Countries){
@@ -470,8 +674,24 @@ app.controller("Mail", function(){
   
 });
 
+app.controller("Contacts", function($scope){
+    document.getElementsByTagName('nav')[0].style.display = "none";
+
+ $scope.$on("$destroy", function() {
+     document.getElementsByTagName('nav')[0].style.display = "block";
+});
+  
+});
+
 
 app.controller("Conversation", function($scope, $stateParams, $translate, $http) {
+document.getElementsByTagName('nav')[0].style.display = "none";
+
+ $scope.$on("$destroy", function() {
+     document.getElementsByTagName('nav')[0].style.display = "block";
+});
+    
+
   Parse.initialize("eTSR27OWlKZsPlg8JBmDxLBVUiuw0A6qLe1yJwHK", "C7aQYWGQstNvi0F1yBYMrF82tM2gNkG0slF4cy3g");
     $translate('TRANSLATE').then(function (t) {
           $scope.translate = t;
@@ -499,6 +719,13 @@ app.controller("Conversation", function($scope, $stateParams, $translate, $http)
      }
      
      $scope.update = function(){
+      if(typeof $scope.textarea === 'undefined'){
+        return;
+      }
+      if($scope.textarea.length == 0){
+        return;
+      }
+      
        var audio = new Audio('audio/strum.mp3');
       audio.play()
        
@@ -594,6 +821,56 @@ app.controller("Conversation", function($scope, $stateParams, $translate, $http)
 app.controller("Dashboard", function($scope ){
 });
 
+app.controller("Profile", function($scope, $stateParams){
+    $scope.prof = "place";
+   Parse.initialize("eTSR27OWlKZsPlg8JBmDxLBVUiuw0A6qLe1yJwHK", "C7aQYWGQstNvi0F1yBYMrF82tM2gNkG0slF4cy3g");
+  
+    var Profile = Parse.Object.extend("Profile");
+   
+    var query = new Parse.Query(Profile);
+    query.equalTo("username", $stateParams.username);
+    query.limit(1);
+    
+    
+
+    
+
+     
+      query.find({
+        success: function(input) {
+          console.log("queried");
+            var p = JSON.parse(JSON.stringify( input[0] ));
+            $scope.prof = p;
+            $scope.$apply();
+            console.log(p.gender);
+          console.log($stateParams.username);
+          
+          /*
+          var rs = [];
+          for(var i = 0; i < women.length; i++)
+          {
+            console.log(women)
+            p = JSON.parse(JSON.stringify(women[i])); // weird
+            rs.push(p);
+          }
+         $scope.results = rs;
+         $scope.showSpinner = false;
+         $scope.$apply()*/;
+         
+        }
+      });
+  
+});
+
+app.controller("Language", function($scope, $rootScope, Preferance ){
+    $scope.onLang = function(lang){
+        Preferance.setCookie("Language", lang);
+        //console.log(Preferance.exists("language"));
+        $rootScope.$broadcast('changelanguage', lang);
+    }
+    
+});
+
 app.config(function($stateProvider, $urlRouterProvider) {
   //
   // For any unmatched url, redirect to /state1
@@ -649,6 +926,20 @@ app.config(function($stateProvider, $urlRouterProvider) {
       templateUrl: "templates/dashboard.html",
       controller: "Dashboard"
     })
-    
+    .state('profile', {
+      url: "/profile/:username",
+      templateUrl: "templates/profile.html",
+      controller: "Profile"
+    })
+    .state('contacts', {
+      url: "/contacts",
+      templateUrl: "templates/contacts.html",
+      controller: "Contacts"
+    })
+     .state('language', {
+      url: "/language",
+      templateUrl: "templates/Language.html",
+      controller: "Language"
+    })
     
 });
