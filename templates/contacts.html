@@ -1,3 +1,4 @@
+
 <div class="greyback2">
 
   <button popover-placement="bottom"  type="button" style="background: transparent;border-color: transparent;" 
@@ -17,12 +18,20 @@
                 </a>
  </div>
 <div class="col-lg-6 col-md-6 col-sm-10 col-xs-12  col-lg-offset-3">
+    <h4>{{ 'CONTACTS' | translate }}</h4>
+    <hr/>
+    <button class="btn btn-default btn-panel" ng-click="refresh()">
+        <i class="glyphicon glyphicon-refresh fa-2x"></i>
+    </button>
 	<ul class="list-group">
-  <li class="list-group-item">Cras justo odio</li>
-  <li class="list-group-item">Dapibus ac facilisis in</li>
-  <li class="list-group-item">Morbi leo risus</li>
-  <li class="list-group-item">Porta ac consectetur ac</li>
-  <li class="list-group-item">Vestibulum at eros</li>
+  <li class="list-group-item not-approved" ng-repeat="r in results">
+      {{r.to}}
+      <i class="glyphicon glyphicon-ban-circle pull-right"></i>
+  </li>
+  <li class="list-group-item approved" ng-repeat="r in results">
+      {{r.to}}
+      <i class="glyphicon glyphicon-ok pull-right"></i>
+  </li>
 </ul>
 	
 </div>

@@ -99,7 +99,7 @@
      'USADOM' : "ESTADOS UNIDOS / (new york)",
       'FR' : "FRANCE",
       'UK' : "UNITED KINDOM",
-      'DR' : "REPUBILCA DOMINICANA",
+      'DR' : "REPUBLICA DOMINICANA",
       'PR' : "PUERTO RICO",
       'GR' : "GERMANY",
       'CA' : "CANADA",
@@ -211,6 +211,14 @@ app.service('Preferance', function(){
 app.controller('Navbar', function($scope, $translate, Preferance, BrowserLanguage){
 
 BrowserLanguage.get
+/*
+swal({
+    title: "hello",
+    text: " hello world"
+});
+*/
+
+
 if(Preferance.exists("Language")){
      $translate.use(Preferance.get("Language"));
 }else{
@@ -350,7 +358,23 @@ if (currentUser) {
             last : function(key){
                 var obj = this.getTimeStamp(key);
                 return obj;
+            },
+            lastAccess : function(key){
+                var obj = this.getTimeStamp(key);
+                return obj;
+            },
+            add: function(key, value){
+                if(this.exists(key)){
+                    var val = this.get(key);
+                    val.push(value);
+                    this.set(key, val);
+                    return;
+                }
+                var val = [];
+                val.push(value);
+                this.set(key, val );
             }
+            
         };
   });
   
@@ -374,6 +398,38 @@ if (currentUser) {
       
     };
   })
+  app.service("MyParse", function(){
+      return{
+          username : function(){
+              Parse.initialize("eTSR27OWlKZsPlg8JBmDxLBVUiuw0A6qLe1yJwHK", "C7aQYWGQstNvi0F1yBYMrF82tM2gNkG0slF4cy3g");
+              parse = Parse.User.current();
+              return parse.get("username");
+          },
+          addSecure: function(objname, objvalue){
+              Parse.initialize("eTSR27OWlKZsPlg8JBmDxLBVUiuw0A6qLe1yJwHK", "C7aQYWGQstNvi0F1yBYMrF82tM2gNkG0slF4cy3g");
+              var Profile = Parse.Object.extend(objname);
+              var custom_acl = new Parse.ACL();
+            // give write access to the current user
+            custom_acl.setWriteAccess( Parse.User.current(), true);
+            // disable public read access
+            custom_acl.setPublicReadAccess(true);
+                        
+            var prof = new Profile();
+           prof.save(objvalue, {
+                success: function(gameTurnAgain) {
+    
+                },
+                error: function(gameTurnAgain, error) {
+                // The save failed.  Error is an instance of Parse.Error.
+                }
+                });
+      
+              
+          }
+          
+  
+      }
+  });
   
   app.filter('range', function() {
   return function(input, total) {
@@ -405,17 +461,39 @@ app.filter('Gender', function(){
 
 
   
-  app.controller('Search', function($scope, Countries,  toastr, $translate, $q, $document, Cache){
+  app.controller('Search', function($scope, Countries,  toastr, $translate, $q, $document, Cache, MyParse){
+      
      $scope.disableSearch = false;
    $scope.countries = Countries;
    $scope.isCollapsed = false;
    $scope.gen = "FEMALE";
   $scope.idx = "100";
+  
    var chosen = [];
     $scope.showSpinner = false;
-    
-    if( Cache.exists("results") ){
-         $scope.results = Cache.get("results");
+   
+    if( Cache.exists("favorites") ){
+           var val = Cache.get("favorites"); 
+           var res = Cache.get("results");
+            console.log("favorites loaded");
+            
+               
+              for(var p = 0; p < res.length ; p++){
+                  for(var i = 0; i < val.length; i++){
+                   
+                      //console.log(_.findIndex(res, 'username', val[i].value  ) ); 
+                      if( _.includes(res[p], val[i].value) ){
+                         res =  _.drop(res,  p);
+                      }
+                    }
+              }
+               
+                      
+                    
+              
+                
+        
+         $scope.results = res;
          console.log( Cache.last("results") );
          console.log("from cache");
          $scope.showSpinner = false;
@@ -436,13 +514,14 @@ app.filter('Gender', function(){
        return deferred.promise;
    }
    
-   $scope.onContacts = function(ind){
+   $scope.onContacts = function(ind, username){
      chosen.push(ind);
    
      $scope.idx = ind;
      el = document.querySelector('[frame="'+ind+'"]');
      el.addEventListener("transitionend", function(name1){
-       console.log(name1);
+       Cache.add("ContactRequest", { to: username, from: MyParse.username(), shared: false });
+       
         document.querySelector('[frame="'+ind+'"]').style.display = "none";
      }, true);
     document.querySelector('[frame="'+ind+'"]').style.opacity = 0;
@@ -456,9 +535,40 @@ app.filter('Gender', function(){
     
      
    }
-   $scope.onFavorite = function(){
-     console.log("fav");
+   $scope.onFavorite = function(username){
+       var user = MyParse.username();
+       
+       if(Cache.exists("favorites")){
+           var val = Cache.get("favorites"); 
+           var r = val.map(function(input){
+               var i = input;
+               console.log(i.value);
+               if(i.value == username){
+                   
+                   return input;
+                   
+               }
+               
+           });
+           $scope.myFavorites = r;
+          
+       }
+       var Favorite ={
+           key: user,
+           value: username
+       }
+       
+       Cache.add("favorites", Favorite);
+       
+       
+      // MyParse.addSecure("favorites", Favorite);
+    /*
+            var Profile = Parse.Object.extend("Profile");
+        
+            var query = new Parse.Query(Profile); 
+            */
    }
+   
    $scope.onSend = function(){
      console.log("send");
    }
@@ -576,10 +686,26 @@ app.filter('Gender', function(){
     
   })
   
-  app.controller('Login',['$scope', 'toastr', '$location', '$rootScope', function($scope, toastr, $location, $rootScope){
+  app.controller('Login',['$scope', 'toastr', '$location', '$rootScope', 'MyParse', function($scope, toastr, $location, $rootScope, MyParse){
        $scope.$on("$destroy", function() {
      
     });
+
+
+    try{
+        MyParse.username()
+         swal({
+                      title : "",
+                  
+                      type: "success"
+                  },function(){
+                      $location.path("/dashboard");
+                  });
+    }catch(e){
+        
+    }
+     
+                  
     $scope.onSubmit = function(valid){
       toastr.clear();
        if(valid){
@@ -592,12 +718,19 @@ app.filter('Gender', function(){
                   toastr.success('successful login', 'Login',{closeButton: true});
                   document.getElementsByClassName("login-btns")[0].style.display = "none";
                   document.getElementsByClassName("actionbar")[0].style.display = "block";
-                  $location.path("/dashboard");
+                  //$location.path("/dashboard");
                   $rootScope.$broadcast('loggedin', true);
-                  
+                  location.reload();
+                 
                 },
                 error: function(user, error) {
+                    swal({
+                      title : ":}",
+                      text : error.message,
+                      type: "error"
+                  });
                   toastr.error(error.message, error.code,{closeButton: true});
+                  
                 }
           });
        }
@@ -674,8 +807,21 @@ app.controller("Mail", function(){
   
 });
 
-app.controller("Contacts", function($scope){
+app.controller("Contacts", function($scope, Cache){
+    $scope.results =[];
     document.getElementsByTagName('nav')[0].style.display = "none";
+    if( Cache.exists("ContactRequest") ){
+        $scope.results = Cache.get("ContactRequest");
+        
+    }
+    $scope.refresh = function(){
+        if(localStorage){
+            localStorage.removeItem("ContactRequest");
+        }
+        
+        location.reload();
+        
+    }
 
  $scope.$on("$destroy", function() {
      document.getElementsByTagName('nav')[0].style.display = "block";
@@ -683,6 +829,26 @@ app.controller("Contacts", function($scope){
   
 });
 
+/*
+      angular.forEach(items, function (item) {
+        var valueToCheck, isDuplicate = false;
+
+        for (var i = 0; i < newItems.length; i++) {
+          if (angular.equals(extractValueToCompare(newItems[i]), extractValueToCompare(item))) {
+            isDuplicate = true;
+            break;
+          }
+        }
+        if (!isDuplicate) {
+          newItems.push(item);
+        }
+
+      });
+      items = newItems;
+    }
+    return items;
+  };
+});*/
 
 app.controller("Conversation", function($scope, $stateParams, $translate, $http) {
 document.getElementsByTagName('nav')[0].style.display = "none";
@@ -862,13 +1028,24 @@ app.controller("Profile", function($scope, $stateParams){
   
 });
 
-app.controller("Language", function($scope, $rootScope, Preferance ){
+app.controller("Language", function($scope, $rootScope, Preferance, $location ){
     $scope.onLang = function(lang){
         Preferance.setCookie("Language", lang);
         //console.log(Preferance.exists("language"));
         $rootScope.$broadcast('changelanguage', lang);
+        $location.path(document.referrer);
+        
     }
     
+});
+
+app.controller('Favorites', function($scope, Cache, MyParse){
+    if(Cache.exists("favorites")){
+        
+            $scope.myFavorites = _.uniq( Cache.get("favorites"), 'value' );
+            
+    }
+
 });
 
 app.config(function($stateProvider, $urlRouterProvider) {
@@ -935,6 +1112,10 @@ app.config(function($stateProvider, $urlRouterProvider) {
       url: "/contacts",
       templateUrl: "templates/contacts.html",
       controller: "Contacts"
+    }).state('favorites', {
+      url: "/favorites",
+      templateUrl: "templates/favorites.html",
+      controller: "Favorites"
     })
      .state('language', {
       url: "/language",
