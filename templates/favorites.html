@@ -1,8 +1,14 @@
 
-<div class="col-lg-6 col-md-6 col-sm-10 col-xs-12  col-lg-offset-3">
+<div class="col-lg-6 col-md-6 col-sm-10 col-xs-12  col-lg-offset-3" style="padding: 30px 30px 30px 30px;">
 	<ul class="list-group">
-  <li class="list-group-item" ng-repeat="result in myFavorites" ui-sref="profile({ username: result.value })">
+  <li class="list-group-item" ng-repeat="result in myFavorites">
+      <a ui-sref="profile({ username: result.value })">
       {{ result.value }}
+      </a>
+     
+           <a class="glyphicon glyphicon-comment fa-3x  pull-right" style="color: red; opacity: .4; " ui-sref="conversation({convoid: result.value})"></a>
+   
+     
   </li>
   
 </ul>

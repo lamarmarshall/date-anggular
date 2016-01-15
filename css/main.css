@@ -11,12 +11,24 @@ body{
 	
 }	
 .hero{
-	min-height: 475px;
+	min-height: 375px;
 	width: 100%;
-	background: red;
+	background-image: url("/images/bckground.jpg") ;
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
 	margin-top: -25px;
 	overflow-y: hidden;
 }
+
+
+
+    
+   
+
+
+
+
+
 .ng-invalid     {  
 	border-color: red;
 }
@@ -201,14 +213,14 @@ select.pais{
 
 #chat{
 	
-	height: 400px;
+	height: 350px;
 }
 
 .chatbox{
 	background-image: url("/images/paisley.png");
 	background-repeat: repeat;
 	overflow-y: auto;
-	height: 400px;
+	height: 350px;
 }
 
 .chatbox:last-child{
@@ -266,3 +278,38 @@ select.pais{
     font-size: 18px;
     
 }
+
+#navigator-toolbox toolbarbutton label {
+  color: orange !important;
+}
+
+a{
+    color: #b71c1c ;
+}
+
+.upfoto{
+   margin-bottom: 25px;
+}
+@media only screen and (max-width: 767px) {
+
+/*--[ Mobile styles go here]-------------------------------*/
+ .hero{
+            height: 415px;
+        min-height: 255px;
+        width: 100%;
+        background-image: url("/images/bckground.jpg") ;
+        background-repeat: no-repeat;
+        background-size: 100% 80%;
+        margin-top: -25px;
+        overflow-y: hidden;
+    }
+    body{
+        background: whitesmoke;
+    }
+    .mtop{
+        margin-top: 15px;
+    }
+    /* Styles */
+}
+
+

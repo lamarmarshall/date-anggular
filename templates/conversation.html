@@ -21,6 +21,9 @@
   <div class="panel panel-default panel-conversation" >
     <span us-spinner="{radius:30, width:8, length: 16}" spinner-on="spinnerOpen"></span>
 	  <div class="panel-heading">{{ 'HEADCONVERSATION' | translate}}</div>
+      <button class="btn btn-default btn-panel" ng-click="refresh()">
+        <i class="glyphicon glyphicon-refresh fa-2x"></i>
+    </button>
     <div class="panel-body chatbox">
       
       <div id="chat">
@@ -29,7 +32,10 @@
 	     
 	
     </div>
-	
+    <button id="talk" ng-click="onTalk()" ng-disabled="disabletalk" class="pull-right" ng-class="{ 'glow' : glow } " style="background: transparent; border-color: transparent;">
+	<img src="images/unnamed.png" height="35" width="35"   ></img>
+    </button>
+    <p ng-bind="konsole" style="font-size: 10px;" ng-show="false"></p>
    <div class="panel-footer">
 	   <textarea name="textarea" id="textarea" cols="30" rows="2" placeholder="{{ 'CONVERSATIONTEXTAREA' | translate}} {{ userConvo }}" ng-model="textarea" ng-keydown="textareachange($event)"></textarea>
 	   <button class="btn btn-default btn-panel" ng-click="update()">

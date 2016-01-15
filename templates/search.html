@@ -91,7 +91,7 @@
       <div class="panel-body">
      
       <ul class="list-group">
-        <li class="list-group-item" ng-repeat="result in results | Gender:gen" frame="{{$index}}"> 
+        <li class="list-group-item" ng-repeat="result in results | Gender:gen | Location:location" frame="{{$index}}"> 
           
           <div class="result-pic">
               <a ui-sref="profile({ 'username' :  result.username })">
@@ -110,7 +110,7 @@
              <p>{{ "LOCATION" | translate }}: {{ result.location+"DOM" | translate }}</p>
            </div>
            <div>
-             <button  class="btn btn-success" ui-sref="conversation({convoid: '123'})">send</button>
+             <button  class="btn btn-success" ui-sref="conversation({convoid: result.username})">send</button>
            </div>
            <div class="pull-right">
              <i class="fa fa-star-o glow-text" ng-click="onFavorite(result.username)">{{ 'FAVORITE' | translate }}</i>
