@@ -10,7 +10,7 @@
       		<button class="btn btn-danger">
 				{{ 'DELETE' | translate }}
 			  </button>
-   
+   <!--
 	     <table class="table table-hover" cellspacing="1">
 			 <caption>
 				 {{ 'MESSAGES' | translate}}
@@ -28,6 +28,9 @@
 				 </tr>
 			 </thead>
 			 <tbody>
+                 <tr>
+                     
+                 </tr>
 				 <td>
 					 <input type="checkbox">
 				 </td>
@@ -38,7 +41,28 @@
 			 </tbody>
 
 		</table>
-	
+	-->
+    	<ul class="list-group">
+  <li class="list-group-item" ng-repeat="r in results" >
+      <div ng-show="r.type == 'contactreq'">
+      <p  class="contactreqmail"><a ui-sref ="profile({username: r.from})">{{ r.from }}:  desea tus contactos?<span class="pull-right">{{ 'VIEWPROFILE' | translate }}</span></a>
+      
+      <p class="white1">
+          <img width="35" height="35" src="images/whatsapp.png">
+          <img width="35" height="35" src="images/viber.webp">
+          <button class="btn btn-success btn-xs pull-right">{{ 'ALLOW' | translate }}</button></p></p>
+          </div>
+     <div ng-show="r.type != 'contactreq'" ui-sref="conversation({convoid: r.from})">
+      {{ r.from }}
+      
+      <div class="pull-right">
+          {{ r. createdAt | date }}
+      </div>
+      </div>
+    
+  </li>
+
+</ul>
     </div>
    
   </div>

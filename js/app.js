@@ -64,7 +64,20 @@
       "QLANGUAGE" : "LANG", 
       "CHANGELANGUAGE" : "Change Language",
       "USADOM" : "UNITED STATES",
-      "SERVERDOWN" : "Server Down"
+      "SERVERDOWN" : "Server Down",
+      "UPLOADMSG" : "click to upload photo",
+      "MAINPHOTO" : "main photo",
+      'MYPHOTOS' : 'Photos',
+       "PHOTOS" : "Photos",
+       'ASKCONTACT' : "wants your contact info?",
+       "ALLOW" : "Allow",
+       "VIEWPROFILE" : "View Profile" ,
+       "UGLY" : "Ugly",
+       "PRETTY" : "Pretty",
+       "PERFECT" : "Perfect",
+       "RATE" : "Rate",
+       'UPDATED' : "updated",
+       "SUCCESS" : "success"
   };
   
   var espanol = {
@@ -133,8 +146,23 @@
       "CHANGELANGUAGE" : "Cambiar Idioma",
       "SERVERDOWN" : "Error no conexion",
       "LANG" : "es",
+      "UPLOADMSG" : "agregar foto",
+      "MAINPHOTO" : "foto principal",
+      'MYPHOTOS' : 'Mis Fotos',
+      "PHOTOS" : "Fotos",
+      'ASKCONTACT' : " desea tus contactos?",
+      'ALLOW' : "se permite",
+      "VIEWPROFILE" : "Ver Perfil",
+      "UGLY" : "Feo / Fea",
+       "PRETTY" : "Guapo / Bonita",
+       "PERFECT" : "Perfecto/a",
+       "RATE" : "Juzgar",
+       'UPDATED' : "actualizado",
+       "SUCCESS" : "exito" 
+       
    
   };
+var localhost = "http://localhost:5000";
   var Lang = {};
   var languages = {};
    Lang['english'] = english;
@@ -144,10 +172,18 @@
    
   
   
-  var app = angular.module("Date", ['ui.router' , 'pascalprecht.translate', 'ui.bootstrap' ,'angularSpinner'  ]);
+  var app = angular.module("Date", ['ui.router' , 'pascalprecht.translate', 'ui.bootstrap' ,'angularSpinner', 'bootstrapLightbox','hmTouchEvents', 'ngResource', 'toastr' ]);
   
-   
+   app.config(function (LightboxProvider ) {
+  LightboxProvider.getImageUrl = function (image) {
+    return localhost+'/images/' + image.filename;
+  };
 
+});
+
+app.config(function($resourceProvider) {
+  $resourceProvider.defaults.stripTrailingSlashes = true;
+});
 
 app.config(['$translateProvider', function ($translateProvider) {
 
@@ -155,6 +191,104 @@ app.config(['$translateProvider', function ($translateProvider) {
   $translateProvider.translations('es', espanol);
   $translateProvider.preferredLanguage('en');
 }]);
+  app.config(['$httpProvider', function($httpProvider) {
+     $httpProvider.defaults.useXDomain = true;
+$httpProvider.defaults.withCredentials = false;
+delete $httpProvider.defaults.headers.common["X-Requested-With"];
+$httpProvider.defaults.headers.common["Accept"] = "application/json";
+$httpProvider.defaults.headers.common["Content-Type"] = "application/json";
+    }
+]);
+
+app.factory('Ip', function($http, $rootScope){
+     
+        return $http.get(localhost+"/get_ip").then(function(data){
+           
+            return data.data;
+       });
+});
+
+app.service("Speak", function(){
+    return {
+        speak: function(text, lang){
+            var msg = new SpeechSynthesisUtterance(text);
+    msg.voiceURI = 'native';
+    msg.volume = 1; // 0 to 1
+    msg.rate = 1; // 0.1 to 10
+    msg.pitch = 0; //0 to 2
+    msg.lang = lang;
+window.speechSynthesis.speak(msg);
+  msg.onstart = function (event) {
+
+        console.log("started");
+    };
+    msg.onend = function(event) {
+        console.log('Finished in ' + event.elapsedTime + ' seconds.');
+    };
+    msg.onerror = function(event)
+    {
+
+        console.log('Errored ' + event);
+       speechSynthesis.cancel();
+    }
+    msg.onpause = function (event)
+    {
+        console.log('paused ' + event);
+
+    }
+    msg.onboundary = function (event)
+    {
+        console.log('onboundary ' + event);
+    }
+ 
+}
+            
+        }
+    
+});
+app.service("GPS", function($q){
+    var defer = $q.defer()
+   return{
+       get : function(){
+            navigator.geolocation.getCurrentPosition(function(position){
+            defer.resolve( [position.coords.latitude, position.coords.longitude]);
+        });
+        return defer.promise;
+       }
+       /*
+         GPS.get().then(function(data){
+        console.log(data);
+    });*/
+       
+       /*  navigator.geolocation.getCurrentPosition(function(position){
+            var cord =  [position.coords.latitude, position.coords.longitude];
+            console.log(cord);
+        });*/
+   }
+       
+    
+   
+});
+
+
+app.factory('GeoLocate', function($http){
+    return $http.get("http://freegeoip.net/json/186.7.13.95").then(function(data){
+        return data;
+    });
+      /*
+   var location = GeoLocate;
+   location.then(function(data){
+       console.log(data.data);
+   });*/
+}),
+
+app.service('LocalHost', function(){
+   return {
+        get: function(){
+            return "http://localhost:5000/";
+        } 
+   } ;
+});
 
 app.service('Preferance', function(){
    return {
@@ -372,6 +506,30 @@ if (currentUser) {
         };
   });
   
+  app.service("$Photo", function($IPaddress ){
+      return{
+         
+         add: function(file){
+             var ip = "";
+             var ipx = $IPaddress.getip().then(function(data){
+                 return data ;
+             }
+             );
+             /*
+             .then(function(data){
+             ip = data; 
+             console.log({ip: data, file: file});
+             return {ip: data, file: file};
+             });*/
+             ip = JSON.stringify(ipx);
+             return ip;
+             
+             
+             
+         } 
+      }
+  })
+  
   app.service("Countries", function(){
     return {
       USA: "UNITED STATES",
@@ -399,6 +557,105 @@ if (currentUser) {
               parse = Parse.User.current();
               return parse.get("username");
           },
+          user : function(){
+              Parse.initialize("eTSR27OWlKZsPlg8JBmDxLBVUiuw0A6qLe1yJwHK", "C7aQYWGQstNvi0F1yBYMrF82tM2gNkG0slF4cy3g");
+              parse = Parse.User.current();
+              return parse;
+          },
+        
+          countPhotos : function(user){
+               var defered = $q.defer();
+              Parse.initialize("eTSR27OWlKZsPlg8JBmDxLBVUiuw0A6qLe1yJwHK", "C7aQYWGQstNvi0F1yBYMrF82tM2gNkG0slF4cy3g");
+              
+              var query = new Parse.Query("Photo")
+              query.equalTo("username", user);
+              query.count({
+                success: function(count) {
+                        defered.resolve(count);
+                },
+                error: function(error) {
+                   console.log(error);
+                }
+                });
+                     return defered.promise;
+          },
+          delPhoto: function(id){
+              var yourClass = Parse.Object.extend("Photo");
+                var query = new Parse.Query(yourClass);
+                query.get(id, {
+                success: function(yourObj) {
+                    // The object was retrieved successfully.
+                    yourObj.destroy({});
+                },
+                error: function(object, error) {
+                    // The object was not retrieved successfully.
+                    // error is a Parse.Error with an error code and description.
+                }
+                }); 
+          },
+           getAllPhotos: function(){
+               var defered = $q.defer();
+              Parse.initialize("eTSR27OWlKZsPlg8JBmDxLBVUiuw0A6qLe1yJwHK", "C7aQYWGQstNvi0F1yBYMrF82tM2gNkG0slF4cy3g");
+              
+              var query = new Parse.Query("Photo")
+              
+         
+                    query.find({
+                    success: function(results) {
+                           var rs = [];
+                        for(var i = 0; i < results.length; i++)
+                        {
+                         
+                            var p = JSON.parse(JSON.stringify(results[i])); // weird
+                           
+                            rs.push({user: p.user, filename: p.filename, id: p.objectId, url: p.filename, thumbUrl: "thumbs/"+p.filename, username: p.username});
+                            
+                        
+                        }
+                       
+                        defered.resolve(rs);
+                    },
+
+                    error: function(error) {
+                        // error is an instance of Parse.Error.
+                    }
+                });
+                
+                return defered.promise;
+              
+          }
+          ,
+          getPhotos: function(user){
+               var defered = $q.defer();
+              Parse.initialize("eTSR27OWlKZsPlg8JBmDxLBVUiuw0A6qLe1yJwHK", "C7aQYWGQstNvi0F1yBYMrF82tM2gNkG0slF4cy3g");
+              
+              var query = new Parse.Query("Photo")
+              query.equalTo("username", user);
+         
+                    query.find({
+                    success: function(results) {
+                           var rs = [];
+                        for(var i = 0; i < results.length; i++)
+                        {
+                         
+                            var p = JSON.parse(JSON.stringify(results[i])); // weird
+                           
+                            rs.push({user: p.user, filename: p.filename, id: p.objectId, url: p.filename, thumbUrl: "thumbs/"+p.filename});
+                            
+                        
+                        }
+                       
+                        defered.resolve(rs);
+                    },
+
+                    error: function(error) {
+                        // error is an instance of Parse.Error.
+                    }
+                });
+                
+                return defered.promise;
+              
+          },
           addSecure: function(objname, objvalue){
               Parse.initialize("eTSR27OWlKZsPlg8JBmDxLBVUiuw0A6qLe1yJwHK", "C7aQYWGQstNvi0F1yBYMrF82tM2gNkG0slF4cy3g");
               var Profile = Parse.Object.extend(objname);
@@ -407,8 +664,10 @@ if (currentUser) {
             custom_acl.setWriteAccess( Parse.User.current(), true);
             // disable public read access
             custom_acl.setPublicReadAccess(true);
+            custom_acl.setPublicWriteAccess(false);
                         
             var prof = new Profile();
+            prof.setACL(custom_acl);
            prof.save(objvalue, {
                 success: function(gameTurnAgain) {
     
@@ -463,6 +722,34 @@ if (currentUser) {
               
              return defered.promise; 
           },
+                   getMyMessages: function(){
+              var defered = $q.defer();
+               Parse.initialize("eTSR27OWlKZsPlg8JBmDxLBVUiuw0A6qLe1yJwHK", "C7aQYWGQstNvi0F1yBYMrF82tM2gNkG0slF4cy3g");
+              var username = Parse.User.current();
+              username = username.get("username");
+              
+              var toquery = new Parse.Query("messages")
+       
+              toquery.equalTo("to", username );
+             
+              
+              
+              //toquery.descending("createdAt");
+              
+              toquery.find({
+                success: function(results) {
+                    console.log(results);
+                    defered.resolve( results );
+                  
+                },
+                error: function(error) {
+                    console.log(error);
+                    return false;
+                }
+                });
+              
+             return defered.promise; 
+          },
         
           getContacts: function(mclass){
               var defered = $q.defer();
@@ -501,6 +788,46 @@ if (currentUser) {
       }
   });
   
+
+  
+  app.service("$Email", function($http){
+      
+      return {
+        to: "test",
+        content: "test1",
+        send: function(to, content){
+            var req = {
+                    "to" : to,
+                    "content" : content
+                }
+         
+            $http.post('http://localhost:8000/email/send', req).then(
+                function(data){
+                    console.log(data)
+                }
+            )
+        }
+          
+      };
+  })
+  
+  app.service("$IPaddress", function($http, $q){
+      return {
+         ip: "",
+          getip: function(){
+              console.log("getip");
+              var defered = $q.defer();
+                 $http.get('http://localhost:8000/email/ipaddr').success(function(data, status, headers, config) {
+                this.ip = data;
+                 defered.resolve(data);
+                });
+                 return defered.promise; 
+          }
+      }
+  })
+  
+  
+  
   app.filter('range', function() {
   return function(input, total) {
     total = parseInt(total);
@@ -512,9 +839,16 @@ if (currentUser) {
     return input;
   };
 });
+
+app.filter('date', function(){
+    return function(input){
+        return moment(input).format("dddd, MMMM, Do")
+    }
+})
 app.filter('Gender', function(){
     return function(input, gen){
-        var res = [];
+        try {
+               var res = [];
      
            for(var i = 0; i < input.length; i++) {
              
@@ -524,6 +858,10 @@ app.filter('Gender', function(){
            }
 
         return res;
+        } catch (error) {
+            console.log(error);
+        }
+     
     }
 });
 
@@ -554,7 +892,7 @@ app.filter("Location", function(){
 
   
   app.controller('Search', function($scope, Countries,  $translate, $q, $document, Cache, MyParse){
-      
+    console.log("started")  
      $scope.disableSearch = false;
    $scope.countries = Countries;
   $scope.location = "ANY";
@@ -564,10 +902,12 @@ app.filter("Location", function(){
   
    var chosen = [];
     $scope.showSpinner = false;
-   
+     console.log("onclick");
+     
     if( Cache.exists("favorites") ){
-           var val = Cache.get("favorites"); 
-           var res = Cache.get("results");
+        try{
+          var val = Cache.get("favorites"); 
+          var res = Cache.get("results");
             console.log("favorites loaded");
             
                
@@ -581,14 +921,17 @@ app.filter("Location", function(){
                     }
               }
                
-                      
+                   
                     
               
                 
         
-         $scope.results = res;
+         $scope.results = [];
          console.log( Cache.last("results") );
          console.log("from cache");
+        }catch(e){
+            
+        }
          $scope.showSpinner = false;
         
      }
@@ -615,6 +958,7 @@ app.filter("Location", function(){
      el.addEventListener("transitionend", function(name1){
        Cache.add("ContactRequest", { to: username, from: MyParse.username(), shared: false });
        MyParse.addSecure("ContactRequest", { to: username, from: MyParse.username(), shared: false })
+        MyParse.addSecure("messages", { to: username, from: MyParse.username(), type : "contactreq"})
        
         document.querySelector('[frame="'+ind+'"]').style.display = "none";
      }, true);
@@ -667,8 +1011,9 @@ app.filter("Location", function(){
      console.log("send");
    }
    
-   
+ 
    $scope.onClick = function(){
+       
      $scope.disableSearch = true;
      $scope.isCollapsed =  false; 
       $scope.showSpinner = true;
@@ -678,33 +1023,24 @@ app.filter("Location", function(){
      }else{
        $scope.isCollapsed =  false; 
      }
+     /*
      if( Cache.exists("results") ){
          var rs = Cache.get("results");
-         /*
-            if($scope.gender){
-             switch($scope.gender){
-                 case  "FEMALE":
-                 rs = rs.filter(filterFemale);
-                 console.log("female");
-                 break;
-                 case "MALE" :
-                 rs = rs.filter(filterMale);
-                 console.log("male");
-                 break;
-             }
-         }*/
+ 
          $scope.results = rs;
          console.log( Cache.last("results") );
          console.log("from cache");
          $scope.showSpinner = false;
          return;
-     }
+     }*/
      
-     Parse.initialize("eTSR27OWlKZsPlg8JBmDxLBVUiuw0A6qLe1yJwHK", "C7aQYWGQstNvi0F1yBYMrF82tM2gNkG0slF4cy3g");
+    Parse.initialize("eTSR27OWlKZsPlg8JBmDxLBVUiuw0A6qLe1yJwHK", "C7aQYWGQstNvi0F1yBYMrF82tM2gNkG0slF4cy3g");
   
     var Profile = Parse.Object.extend("Profile");
    
     var query = new Parse.Query(Profile);
+    
+   
     if($scope.location == "ANY"){
       
            if($scope.gender){
@@ -725,54 +1061,75 @@ app.filter("Location", function(){
     
     
 
-    
-
+//query.include("user")
+//query. matchesKeyInQuery( key, queryKey, query ) matchesQuery("username", photoQuery);
      
       query.find({
         success: function(women) {
-          console.log("queried");
+        
+       
           var rs = [];
           for(var i = 0; i < women.length; i++)
           {
-            console.log(women)
-            p = JSON.parse(JSON.stringify(women[i])); // weird
-            rs.push(p);
+        
+          
+            
+        
+            //closure
+              var q = function(){
+                  var p = JSON.parse(JSON.stringify(women[i])); // weird
+                var Photo = Parse.Object.extend("Photo");
+        
+
+                var photoQuery = new Parse.Query(Photo);
+                photoQuery.equalTo("username", p.username)
+               
+                photoQuery.find({
+                    success : function(obj){
+                       p.photo = MyParse.inflate(obj);
+                          var fn = function(){
+                               
+                                rs.push(p);
+                                var fn2 = function(){
+                                     Cache.set("results", rs);
+                            
+                                    
+                                   
+                                }
+                                fn2();
+                                  
+                            }
+                            fn();
+                            
+                
+                    },
+                    error: function(e){
+                        alert(e);
+                    }
+                   
+                });
+               
+            }
+          q();
+            //closure
+            
+          
           }
-          Cache.set("results", rs);
+                
+          $scope.showSpinner = false;
+          $scope.results = Cache.get("results");
+          $scope.$digest();                   
+              
+             
          
-         if($scope.gender){
-             switch($scope.gender){
-                 case  "FEMALE":
-                 rs = rs.filter(filterFemale);
-                 break;
-                 case "MALE" :
-                 rs = rs.filter(filterMale);
-                 break;
-             }
-         }
+        
          
-         
-         $scope.results = rs;
-         $scope.showSpinner = false;
-         $scope.$apply();
          
         }
       });
    }
    
-   var filterFemale = function(input){
-       
-       
-          return input.gender == "FEMALE";
-       
-   }
-   
-      var filterMale = function(input){
-       
-       
-          return input.gender == "MALE";
-       
-   }
+
    
   });
   
@@ -780,7 +1137,7 @@ app.filter("Location", function(){
     
   })
   
-  app.controller('Login',['$scope', '$location', '$rootScope', 'MyParse', function($scope,  $location, $rootScope, MyParse){
+  app.controller('Login',['$scope', '$location', '$rootScope', 'MyParse','Cache', function($scope,  $location, $rootScope, MyParse, Cache, GPS){
        $scope.$on("$destroy", function() {
      
     });
@@ -896,7 +1253,15 @@ app.controller("Logout", function($scope, $location){
   $location.path("/");
 });	
 
-app.controller("Mail", function(){
+app.controller("Mail", function($scope, MyParse){
+    $scope.results = []
+    MyParse.getMyMessages().then(function( data){
+         var p = JSON.parse(JSON.stringify(data)); // weird
+              
+     $scope.results = _.uniq(p, 'from');
+     console.log(p)
+    })
+    
   
 });
 
@@ -952,8 +1317,21 @@ app.controller("Contacts", function($scope, Cache, MyParse){
     return items;
   };
 });*/
+app.controller("Home", function($scope){
+    Parse.initialize("eTSR27OWlKZsPlg8JBmDxLBVUiuw0A6qLe1yJwHK", "C7aQYWGQstNvi0F1yBYMrF82tM2gNkG0slF4cy3g");
+    var user = Parse.User.current();
+   
+   
+    if( user != null){
+         $scope.asshole = user.get("username");
+        $scope.regp = false;
+          
+    }  else{
+       $scope.regp = true; 
+    }
+});
 
-app.controller("Conversation", function($scope, $stateParams, $translate, $http, MyParse) {
+app.controller("Conversation", function($scope, $stateParams, $translate, $http, MyParse, Speak, toastr) {
     $scope.textarea = "";
     $scope.konsole = "status good";
     $scope.glow = false;
@@ -1060,6 +1438,21 @@ document.getElementsByTagName('nav')[0].style.display = "none";
      $translate('SERVERDOWN').then(function (t) {
           $scope.serverDown = t;
      });
+     
+      $translate('ASKCONTACT').then(function (t) {
+          $scope.askcontact = t;
+     });
+      $translate('ALLOW').then(function (t) {
+          $scope.allow = t;
+     });
+     
+      $translate('UPDATED').then(function (t) {
+          $scope.updated = t;
+     });
+       $translate('SUCCESS').then(function (t) {
+          $scope.success = t;
+     });
+     
      $scope.convoid = $stateParams.convoid;
     $scope.userConvo = Parse.User.current().get("username");
     $scope.spinnerOpen = false;
@@ -1078,8 +1471,44 @@ document.getElementsByTagName('nav')[0].style.display = "none";
           $scope.update();
         }
      }
+        var _displaycontact = function(input, user){
+              var el = document.getElementById("chat");
+       var els = document.getElementsByClassName("chatbox")[0];
+       var node = document.createElement("P"); 
+       
+       var box  = document.createElement("P");
+       box.className = "white1";
+       var button = document.createElement("BUTTON");
+       button.className ="btn btn-success btn-xs pull-right";
+       var btntext = document.createTextNode($scope.allow)
+       var whatsapp = new Image(35, 35);
+       whatsapp.src ="images/whatsapp.png";
+       var viber = new Image(35, 35);
+       viber.src ="images/viber.webp";
+       button.appendChild(btntext)
+        box.appendChild(whatsapp);
+        box.appendChild(viber);
+       box.appendChild(button);
      
+           node.className = "contactreq"
+    
+       
+       
+ 
+       var txtinput = input.from+": "+$scope.askcontact;
+       var textnode = document.createTextNode(txtinput);
+       node.appendChild(textnode);
+       node.appendChild(box);
+       el.appendChild(node);
+        var els = document.getElementsByClassName("chatbox")[0];
+       els.scrollTop = els.scrollHeight;
+   }  
+   
      var _display = function(input, user){
+          if(typeof(input.message)  == "undefined"){
+              _displaycontact(input, user);
+              return;
+       }
               var el = document.getElementById("chat");
        var els = document.getElementsByClassName("chatbox")[0];
        var node = document.createElement("P"); 
@@ -1089,14 +1518,21 @@ document.getElementsByTagName('nav')[0].style.display = "none";
        var button = document.createElement("BUTTON");
        button.className ="btn btn-default btn-xs pull-right";
        var btntext = document.createTextNode($scope.translate)
+       
+       
+       
+       
        button.appendChild(btntext)
        box.appendChild(button);
+    
        if(user==input.from){
            node.className = "me"
        }else{
             node.className = "you"    
        }
+      
        
+     
  
        var txtinput = input.from+": "+input.message;
        var textnode = document.createTextNode(txtinput);
@@ -1141,7 +1577,8 @@ document.getElementsByTagName('nav')[0].style.display = "none";
                 console.log(tolang);
             }
             
-            
+            txtinput = txtinput.split(':');
+            txtinput = txtinput[1].replace(':', '');
             $http({
               method: 'GET',
               url: 'https://www.googleapis.com/language/translate/v2?key=AIzaSyDCAF0_uLnCPNmbGCwVRb2cPa6TvT5m2b8&source='+$scope.fromlang+'&target='+tolang+'&q='+txtinput
@@ -1150,6 +1587,15 @@ document.getElementsByTagName('nav')[0].style.display = "none";
               $scope.translationresults = response1.data.data.translations[0].translatedText;
               console.log($scope.translationresults);
               
+               var icon = document.createElement("I");
+                icon.className ="glyphicon glyphicon-volume-up fa-2x speak pull-right";
+                    
+                icon.addEventListener('click', function(){
+                    console.log("speak");
+                    console.log(tolang+"   "+txtinput);
+                    Speak.speak($scope.translationresults, tolang);
+                    
+                })
                 var para = document.createElement("P");
                 para.className = "white1";
                 var paratxt = document.createTextNode(trtxt);
@@ -1157,10 +1603,18 @@ document.getElementsByTagName('nav')[0].style.display = "none";
                 var br = document.createElement("BR");
                 var bold = document.createElement("B");
                 bold.appendChild(translation);
+                para.appendChild(icon);
                 para.appendChild(paratxt);
                 para.appendChild(br);
                 para.appendChild(bold);
+                
+               
+     
+       
          node.appendChild(para); 
+         
+          
+         
          els.scrollTop = els.scrollHeight;
          $scope.spinnerOpen = false;
         
@@ -1189,11 +1643,18 @@ document.getElementsByTagName('nav')[0].style.display = "none";
        console.log(rs);
        rs.forEach(function( input, index, array){
            console.log(input);
+           input = inflate( input );
+           console.log( input.type )
+         
             _display( inflate(input), user );
             
        });
        
     })
+     toastr.success($scope.updated, $scope.success, {
+          timeOut: 2000,
+          closeButton: true
+     });
     } 
      $scope.update = function(){
       
@@ -1234,8 +1695,58 @@ document.getElementsByTagName('nav')[0].style.display = "none";
 app.controller("Dashboard", function($scope ){
 });
 
-app.controller("Profile", function($scope, $stateParams){
+app.controller("Profile", function($scope, $stateParams, MyParse, Lightbox,
+Cache){
     $scope.prof = "place";
+    
+    $scope.results = []
+    
+    MyParse.getPhotos($stateParams.username).then(function(data){
+        $scope.results = MyParse.inflate(data)
+    });
+     $scope.openLightboxModal = function (index) {
+        Lightbox.openModal($scope.results, index);
+  };
+  
+     $scope.onFavorite = function(username){
+       var user = MyParse.username();
+  
+       var Favorite ={
+           key: user,
+           value: username
+       }
+       
+       if(Cache.exists("favorites")){
+           var favorites = _.uniq( Cache.get("favorites"), 'value');
+          
+          favorites.forEach(function(input){
+              if(input.key == user){
+                  if(input.value == username){
+                      console.log("not added");
+                      
+                  }
+              }
+             
+          });
+       }
+       
+       Cache.add("favorites", Favorite);
+       MyParse.addSecure("favorites", Favorite);
+       
+       
+      // MyParse.addSecure("favorites", Favorite);
+    /*
+            var Profile = Parse.Object.extend("Profile");
+        
+            var query = new Parse.Query(Profile); 
+            
+            */
+            swal({
+                title: "favorite",
+                type: "success"
+            })
+   }
+    
    Parse.initialize("eTSR27OWlKZsPlg8JBmDxLBVUiuw0A6qLe1yJwHK", "C7aQYWGQstNvi0F1yBYMrF82tM2gNkG0slF4cy3g");
   
     var Profile = Parse.Object.extend("Profile");
@@ -1280,7 +1791,7 @@ app.controller("Language", function($scope, $rootScope, Preferance, $location ){
         Preferance.setCookie("Language", lang);
         //console.log(Preferance.exists("language"));
         $rootScope.$broadcast('changelanguage', lang);
-        $location.path(document.referrer);
+        history.back();
         
     }
     
@@ -1296,7 +1807,159 @@ app.controller('Favorites', function($scope, Cache, MyParse){
   
 });
 
-app.controller('Photo', function($scope, $translate, MyParse){
+app.controller("Swipe", function($scope, MyParse, LocalHost, Ip, GeoLocate, GPS){
+
+    
+        
+  
+    $scope.img = "";
+    $scope.showSpinner = true;
+    $scope.ind = 0;
+    $scope.profilename = "";
+    $scope.localhost = LocalHost.get();
+   
+    MyParse.getAllPhotos().then(function(rs){
+        var i = 0;
+        $scope.img = rs[i].filename;
+        $scope.profilename = rs[i].username;
+        console.log(rs[i].username);
+        $scope.onnext = function(){
+            i++;
+            if(i == rs.length){
+                i=0;
+            }
+            
+            console.log(i);
+            $scope.img = rs[i].filename;
+            $scope.profilename = rs[i].username;
+           
+        }
+        
+             $scope.onback = function(){
+            i--;
+            if(i == -1){
+                i = rs.length-1;
+            }
+            
+            console.log(i);
+            $scope.img = rs[i].filename;
+             $scope.profilename = rs[i].username;
+             
+        }
+        
+       
+  
+    });
+
+ $scope.showSpinner = false;
+    
+    
+});
+
+app.controller('Photo', function($scope, $translate, MyParse, $IPaddress, $Photo, LocalHost){
+    /*document.getElementById("file").addEventListener('change',
+     function(){
+          var tx = document.getElementById("pic").value;
+          
+         console.log($Photo.add(tx))
+        
+       this.parentNode.submit();
+    });*/
+    $scope.pics = []
+    user = MyParse.username();
+    $scope.user = user;
+    $scope.localhost = LocalHost.get();
+    
+    $scope.delete = function(id){
+        MyParse.delPhoto(id);
+    }
+    
+    MyParse.getPhotos(user).then(function(photos){
+            $scope.pics = photos;
+            
+    })
+    
+    
+  
+       $translate('UPLOADMSG').then(function (MSG) {
+              $scope.uploadmsg = MSG;
+             var myDropzone = new Dropzone("#dropzone",
+   { 
+       url: "http://127.0.0.1:5000/upload",
+        maxFilesize: 5,
+       acceptedFiles: "image/jpeg",
+       maxFiles: 4,
+       dictDefaultMessage: $scope.uploadmsg,
+       maxfilesexceeded : function(){
+           swal({
+               title: "4 images maximo",
+               type: "error"
+               
+           })
+           myDropzone.removeAllFiles();
+       }
+   }
+   );
+   
+   
+   
+  
+       myDropzone.on("success", function(file, data) {
+        console.log({username: user, filename: data});
+        
+        $scope.m = true
+        MyParse.countPhotos(user).then(function(data){
+           if(parseInt(data) > 3){
+               swal({
+                   title: "4 image max",
+                   type: "error"
+               });
+               $scope.m = false;
+           } 
+          
+        }).then(function(){
+            
+               console.log($scope.m)
+                if($scope.m){
+                    Parse.initialize("eTSR27OWlKZsPlg8JBmDxLBVUiuw0A6qLe1yJwHK", "C7aQYWGQstNvi0F1yBYMrF82tM2gNkG0slF4cy3g");
+                  
+                  //closure 
+                  var start = function(){
+                       var usrObj = Parse.User.current().id;
+                       
+                      var fn = function(){
+                          console.log(usrObj );
+                          var pto = {username: user, filename: data, user: String(usrObj) }; 
+                          
+                                var fn2 =function(){
+                                    console.log(pto );
+                                    MyParse.addSecure("Photo", pto)  
+                                    $scope.pics.push(pto);
+                                }
+                                
+                            fn2()
+                           
+                            
+                      }
+                      fn();
+                  }
+                  
+                  start();
+                  //closure
+                   
+                  
+           
+                }
+            
+            
+        })
+     
+       
+  });
+          
+       });
+    
+
     
 });
 
@@ -1309,7 +1972,8 @@ app.config(function($stateProvider, $urlRouterProvider) {
   $stateProvider
     .state('home', {
       url: "/home",
-      templateUrl: "templates/home.html"
+      templateUrl: "templates/home.html",
+      controller: "Home"
     })
     .state('list', {
       url: "/list",
@@ -1378,6 +2042,11 @@ app.config(function($stateProvider, $urlRouterProvider) {
       url: "/photo",
       templateUrl: "templates/photo.html",
       controller: "Photo"
+    })
+    .state('swipe', {
+      url: "/swipe",
+      templateUrl: "templates/swipe.html",
+      controller: "Swipe"
     })
     
 });

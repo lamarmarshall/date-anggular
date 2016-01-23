@@ -1,0 +1,50 @@
+<div class="col-lg-6 col-md-6 col-sm-8 col-xs-12 col-lg-offset-3 col-md-offse-3 col-sm-offset-2">
+    <span us-spinner="{radius:30, width:8, length: 16}" spinner-on="showSpinner"></span>
+<div class="panel panel-default">
+   
+    <div class="panel-body" >
+        <div class="row" style="min-height: 370px; max-height: 370px;"  >
+        <img ng-src="{{localhost}}images/thumbs/{{img}}" alt="" class="img-responsive" style="min-height: 370px; max-height: 370px;" hmSwipeleft="onnext()" hmSwiperight="onback()">
+        <br>
+          <p>
+        <button ng-click="onback()"><i class="glyphicon glyphicon-chevron-left fa-3x"></i></button>
+         <button class="pull-right" ng-click="onnext()"><i class="glyphicon glyphicon-chevron-right fa-3x""></i></button>
+         </p>
+    </div>
+    </div>
+    <div class="panel-footer">
+        <div class="row">
+            
+       <button class="btn btn-success form-control" ui-sref="profile({ username: profilename })">
+                {{ 'VIEWPROFILE' | translate }}
+       </button>
+   
+        </div>
+   <!--
+        <hr/>
+        <div class="row greyback4">
+           
+        <div class="col-lg-3 col-md-3 col-sm-3 col-xs-4">
+            <select name="" id="rate" class=" glow" style="max-height: 40px;" >
+                <option class="ratetxt" value="ugly">{{ 'UGLY' | translate }}</option>
+                <option class="ratetxt" value="pretty" selected="selected">{{ 'PRETTY' | translate }}</option>
+                <option class="ratetxt" value="perfect">{{ 'PERFECT' | translate }}</option>
+            </select>
+        </div>
+        <div class="col-lg-9 col-md-9 col-sm-9 col-xs-8">
+            <button class="btn btn-warning pull-right">
+                {{ 'RATE' | translate }}
+            </button>
+       </div>
+-->
+       
+      
+      </div>
+      
+        </div>
+        
+        
+      
+    </div>
+</div>
+</div>

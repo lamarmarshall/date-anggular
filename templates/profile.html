@@ -2,21 +2,11 @@
 
       <div class="row col-xs-offset-1">
       
-            <div class="result-pic col-lg-2 col-md-3 col-xs-4">
-            <img src="images/placeholder.jpeg" alt="" class="img-responsive"/>
+            <div class="result-pic col-lg-2 col-md-3 col-sm-4 col-xs-4" ng-repeat="r in results">
+            <img src="http://localhost:5000/images/{{r.filename}}" alt="" class="img-responsive" ng-click="openLightboxModal($index)"/>
           </div>
           
-          <div class="result-pic col-lg-2 col-md-3 col-xs-4">
-            <img src="images/placeholder.jpeg" alt="" class="img-responsive" />
-          </div>
-          
-          <div class="result-pic col-lg-2 col-md-3 col-xs-4">
-            <img src="images/placeholder.jpeg" alt="" class="img-responsive" />
-          </div>
-          
-          <div class="result-pic col-lg-2 col-md-3 col-xs-4">
-            <img src="images/placeholder.jpeg" alt="" class="img-responsive" />
-          </div>
+  
 
   </div>
     
@@ -24,8 +14,8 @@
          <hr/>
       </div>
       
-      <div class="row greyback">
-        <div class="col-lg-10">
+      <div class="row greyback3">
+        <div class="col-lg-8">
         <p> {{prof.username}}</p>
         <p>{{prof.age}}</p>
         <p> {{ prof.gender | translate }}</p>
@@ -36,7 +26,7 @@
       <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12 ">
         <div class="row greyback  ">
           <div class="col-lg-3 col-md-3 col-xs-4 ">
-              <i class="fa fa-star-o " ng-click="onFavorite()">{{ 'FAVORITE' | translate }}</i>
+              <i class="fa fa-star-o " ng-click="onFavorite(prof.username)">{{ 'FAVORITE' | translate }}</i>
           </div>
           
           <div class="col-lg-3 col-md-3 col-xs-5">
@@ -46,7 +36,7 @@
           </div>
           
           <div class="col-lg-3 col-md-3 col-xs-3">
-            <button class="btn btn-success">
+            <button class="btn btn-success" ui-sref="conversation({convoid: prof.username})">
               {{ "SEND" | translate }}
             </button>
           </div>
@@ -57,7 +47,7 @@
       <div class="row">
         <hr/>
       </div>
-      
+      <!--
       <div class="row">
         <div class="col-lg-5 col-md-5">
           <div class="panel panel-default">
@@ -85,7 +75,7 @@
         </div>
         
       </div>
-
+-->
        
  
    

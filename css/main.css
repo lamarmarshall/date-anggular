@@ -198,22 +198,45 @@ select.pais{
 	background: #e0f2f1 ;
 	color: #212121;;
 	padding: 15px 15px 15px 15px;
+    opacity:.7;
 }
 .you{
 	background: #f0f4c3 ;
 	color: #212121;;
 	padding: 15px 15px 15px 15px;
-	opacity:.5;
+	
 	margin-top: 5px;
 }
 
 .me button{
 	display: none;
 }
+.contactreq{
+    background: green;
+    color: white;
+    min-height: 75px;
+    padding: 5px 5px 5px 5px;
+}
+.contactreqmail{
+    background: green;
+    color: white;
+    min-height: 55px;
+    padding: 5px 5px 5px 5px;
+}
+.contactreqmail a{
+    color: white;
+}
 
 #chat{
 	
 	height: 350px;
+}
+.speak{
+    margin-right: 15px;
+}
+
+.speak:hover{
+    color: red;
 }
 
 .chatbox{
@@ -222,12 +245,30 @@ select.pais{
 	overflow-y: auto;
 	height: 350px;
 }
+.up{
+    margin-top: -130px;
+}
+
+.upsmall{
+    margin-top: -80px;
+}
 
 .chatbox:last-child{
 	margin-bottom: 55px;
 }
 
 .greyback{
+	background-color: gray;
+	color: white;
+	padding: 40px 40px 40px 40px;
+	margin-bottom: 30px;
+}
+.greyback4{
+	background-color: gray;
+    padding: 10px 10px 10px 10px;
+}
+.greyback3{
+    max-width:  85%;                       
 	background-color: gray;
 	color: white;
 	padding: 40px 40px 40px 40px;
@@ -290,6 +331,22 @@ a{
 .upfoto{
    margin-bottom: 25px;
 }
+
+.love{
+    padding: 25px 25px 25px 25px;
+    background: darkred;
+    color:white;
+}
+.swipeimage{
+    height: 250px;
+}
+#rate{
+    padding: 5px 5px 5px 5px;
+}
+.ratetxt{
+    text-align: center;
+    
+}
 @media only screen and (max-width: 767px) {
 
 /*--[ Mobile styles go here]-------------------------------*/
@@ -303,6 +360,14 @@ a{
         margin-top: -25px;
         overflow-y: hidden;
     }
+    .greyback3{
+    width:  100%; 
+    margin-left: 25px;                      
+	background-color: gray;
+	color: white;
+	padding: 40px 40px 40px 40px;
+	margin-bottom: 30px;
+}
     body{
         background: whitesmoke;
     }
