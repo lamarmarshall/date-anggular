@@ -2264,7 +2264,7 @@ app.config(function($stateProvider, $urlRouterProvider) {
     })
      .state('language', {
       url: "/language",
-      templateUrl: "templates/Language.html",
+      templateUrl: "templates/language.html",
       controller: "Language"
     })
      .state('photo', {
