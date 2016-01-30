@@ -170,7 +170,20 @@ var localhost = "http://localhost:5000";
    languages['es'] = "espanol";
    languages['en'] = "english";
    
-  
+function loggedin(){
+    Parse.initialize("eTSR27OWlKZsPlg8JBmDxLBVUiuw0A6qLe1yJwHK", "C7aQYWGQstNvi0F1yBYMrF82tM2gNkG0slF4cy3g");
+        try{
+         var _user = new Parse.User.current();
+    
+        _user.get("username");
+    }catch(e){
+        if(e instanceof TypeError){
+            return false;
+        }
+        
+    }
+    return true;
+}
   
   var app = angular.module("Date", ['ui.router' , 'pascalprecht.translate', 'ui.bootstrap' ,'angularSpinner', 'bootstrapLightbox','hmTouchEvents', 'ngResource', 'toastr' ]);
   
@@ -183,12 +196,14 @@ var localhost = "http://localhost:5000";
 
 app.config(function($resourceProvider) {
   $resourceProvider.defaults.stripTrailingSlashes = true;
+   Parse.initialize("eTSR27OWlKZsPlg8JBmDxLBVUiuw0A6qLe1yJwHK", "C7aQYWGQstNvi0F1yBYMrF82tM2gNkG0slF4cy3g");
 });
 
 app.config(['$translateProvider', function ($translateProvider) {
 
   $translateProvider.translations('en',english);
   $translateProvider.translations('es', espanol);
+  $translateProvider.useSanitizeValueStrategy('escapeParameters');
   $translateProvider.preferredLanguage('en');
 }]);
   app.config(['$httpProvider', function($httpProvider) {
@@ -200,12 +215,12 @@ $httpProvider.defaults.headers.common["Content-Type"] = "application/json";
     }
 ]);
 
-app.factory('Ip', function($http, $rootScope){
-     
-        return $http.get(localhost+"/get_ip").then(function(data){
-           
-            return data.data;
-       });
+app.service('UpdateLocation', function(){
+    return {
+        update: function(){
+            loca
+        }
+    }
 });
 
 app.service("Speak", function(){
@@ -275,6 +290,24 @@ app.factory('GeoLocate', function($http){
     return $http.get("http://freegeoip.net/json/186.7.13.95").then(function(data){
         return data;
     });
+      /*
+   var location = GeoLocate;
+   location.then(function(data){
+       console.log(data.data);
+   });*/
+}),
+
+app.factory('GeoLocate2', function($http, $q){
+    return{
+        query: function(ip){
+            var defer = $q.defer();
+         $http.get("http://freegeoip.net/json/"+ip).then(function(data){
+                defer.resolve( data );
+          });
+           return defer.promise;
+         }
+
+    }
       /*
    var location = GeoLocate;
    location.then(function(data){
@@ -551,7 +584,15 @@ if (currentUser) {
     };
   })
   app.service("MyParse", function($q){
+           function inflate(input){
+              var p = JSON.parse(JSON.stringify(input)); // weird
+              return p;
+          }
       return{
+             inflate: function(input){
+              var p = JSON.parse(JSON.stringify(input)); // weird
+              return p;
+          },
           username : function(){
               Parse.initialize("eTSR27OWlKZsPlg8JBmDxLBVUiuw0A6qLe1yJwHK", "C7aQYWGQstNvi0F1yBYMrF82tM2gNkG0slF4cy3g");
               parse = Parse.User.current();
@@ -562,6 +603,7 @@ if (currentUser) {
               parse = Parse.User.current();
               return parse;
           },
+      
         
           countPhotos : function(user){
                var defered = $q.defer();
@@ -593,6 +635,25 @@ if (currentUser) {
                 }
                 }); 
           },
+          getPhoto: function(username){
+              
+              // Parse.initialize("eTSR27OWlKZsPlg8JBmDxLBVUiuw0A6qLe1yJwHK", "C7aQYWGQstNvi0F1yBYMrF82tM2gNkG0slF4cy3g");
+       var defered = $q.defer();
+              var query = new Parse.Query("Photo")
+              query.equalTo("username", username);
+              
+              query.first({
+                  success: function(rs){
+                      rs = inflate(rs)
+                      defered.resolve(rs.filename);
+                  }
+              });
+              
+              
+              return defered.promise;
+              
+          }
+          ,
            getAllPhotos: function(){
                var defered = $q.defer();
               Parse.initialize("eTSR27OWlKZsPlg8JBmDxLBVUiuw0A6qLe1yJwHK", "C7aQYWGQstNvi0F1yBYMrF82tM2gNkG0slF4cy3g");
@@ -683,10 +744,7 @@ if (currentUser) {
       
               
           },
-            inflate: function(input){
-              var p = JSON.parse(JSON.stringify(input)); // weird
-              return p;
-          },
+            
           skope: function(){
               return this;
           }
@@ -1137,8 +1195,33 @@ app.filter("Location", function(){
     
   })
   
-  app.controller('Login',['$scope', '$location', '$rootScope', 'MyParse','Cache', function($scope,  $location, $rootScope, MyParse, Cache, GPS){
-       $scope.$on("$destroy", function() {
+  app.controller('Login',function($scope,  $location, $rootScope, MyParse, Cache, GPS, $http, GeoLocate2){
+      
+
+    $http.get('https://api.ipify.org').then(function(data){
+    Cache.set('ip', data);
+});
+
+GPS.get().then(function(geo){
+    Cache.set('geopoints', geo);
+});
+
+
+GeoLocate2.query( Cache.get("ip").data ).then(function(data){
+    Cache.set("country", data.data.country_name);
+    Cache.set("city", data.data.city);
+    Cache.set("region", data.data.region_name);
+    console.log(data);
+});
+    
+
+  
+    
+
+
+     
+    
+   $scope.$on("$destroy", function() {
      
     });
 
@@ -1155,6 +1238,8 @@ app.filter("Location", function(){
     }catch(e){
         
     }
+    
+    
      
                   
     $scope.onSubmit = function(valid){
@@ -1165,12 +1250,78 @@ app.filter("Location", function(){
           Parse.initialize("eTSR27OWlKZsPlg8JBmDxLBVUiuw0A6qLe1yJwHK", "C7aQYWGQstNvi0F1yBYMrF82tM2gNkG0slF4cy3g");
               Parse.User.logIn($scope.username, $scope.pw, {
                 success: function(user) {
+                 //set location in parse
+                   var Location = Parse.Object.extend("Location");
+    var query = new Parse.Query("Location");
+    query.equalTo("username", user.get("username"));
+    query.count({
+        success: function(data){
+            if(data == 0){
+                var location = new Location(); 
+                var acl = new Parse.ACL();
+                acl.setPublicReadAccess(true);
+                acl.setWriteAccess( Parse.User.current(), true ) ;
+                location.setACL(acl);
+                location.set("username", user.get("username"));
+                location.set("geolocation", JSON.stringify(Cache.get("geopoints")));
+                location.set("ip", Cache.get("ip").data);
+                location.set("geoip", Cache.get("city")+","+Cache.get("region")+","+Cache.get("country"));
+                location.save(null, {
+                    success: function(){
+                        console.log("location was saved");
+                                //end set location in parse
+                        document.getElementsByClassName("login-btns")[0].style.display = "none";
+                        document.getElementsByClassName("actionbar")[0].style.display = "block";
+                        //$location.path("/dashboard");
+                        $rootScope.$broadcast('loggedin', true);
+                        window.location.reload();
+                    },
+                    error: function(e){
+                        console.log(e);
+                    }
+                });
+                
+            }else{
+                        query.first({
+                            success : function(qu){
+                        var Location = Parse.Object.extend("Location");
+                        var Obj = new Location();
+                        Obj.id = qu.id;
+                        Obj.set("geolocation", JSON.stringify(Cache.get("geopoints")));
+                        Obj.set("ip", Cache.get("ip").data);
+                        Obj.set("geoip", Cache.get("city")+","+Cache.get("region")+","+Cache.get("country"));
+                           Obj.save(null, {
+                                success: function(){
+                                    console.log("location was updated");
+                                    //end set location in parse
+                                    document.getElementsByClassName("login-btns")[0].style.display = "none";
+                                    document.getElementsByClassName("actionbar")[0].style.display = "block";
+                                    //$location.path("/dashboard");
+                                    $rootScope.$broadcast('loggedin', true);
+                                    window.location.reload();
+                                },
+                                error: function(e){
+                                    console.log(e);
+                                }
+                            });
+                                
+                            }
+                               
+                            
+                        });
+                    
+                   
+              
+            }
+        },
+        error: function(){
+            swal({
+                title : "error",
+                type: "error"
+            })
+        }
+    })
                  
-                  document.getElementsByClassName("login-btns")[0].style.display = "none";
-                  document.getElementsByClassName("actionbar")[0].style.display = "block";
-                  //$location.path("/dashboard");
-                  $rootScope.$broadcast('loggedin', true);
-                  location.reload();
                  
                 },
                 error: function(user, error) {
@@ -1189,9 +1340,9 @@ app.filter("Location", function(){
        }
     }
    
-  }]);
+  });
   
-  app.controller("Register", function($scope, $location, Countries){
+  app.controller("Register", function($scope, $location, Countries, $http, GeoLocate2, GPS, Cache){
     $scope.disabled = false;
     $scope.countries = Countries;
       $scope.onSubmit = function(isValid){
@@ -1229,11 +1380,52 @@ app.filter("Location", function(){
                 prof.set("user", Parse.User.current());
                 
                 
-                prof.save()
-               
-                $location.path("/wizard");
+                prof.save(null, {
+                     success: function(){
+                         $http.get('https://api.ipify.org').then(function(data){
+                        Cache.set('ip', data);
+                    });
+
+                    GPS.get().then(function(geo){
+                        Cache.set('geopoints', geo);
+                    });
+
+
+                    GeoLocate2.query( Cache.get("ip").data ).then(function(data){
+                        Cache.set("country", data.data.country_name);
+                        Cache.set("city", data.data.city);
+                        Cache.set("region", data.data.region_name);
+                        console.log(data);
+                    });
+                 var Location = Parse.Object.extend("Location");   
+                var location = new Location(); 
+                var acl = new Parse.ACL();
+                acl.setPublicReadAccess(true);
+                acl.setWriteAccess( Parse.User.current(), true ) ;
+                location.setACL(acl);
+                location.set("username", user.get("username"));
+                location.set("geolocation", JSON.stringify(Cache.get("geopoints")));
+                location.set("ip", Cache.get("ip").data);
+                location.set("geoip", Cache.get("city")+","+Cache.get("region")+","+Cache.get("country"));
+                location.save(null, {
+                    success: function(){
+                        console.log("location was saved");
+                        
+                    },
+                    error: function(e){
+                        console.log(e);
+                    }
+                });
+                        
+                    }
+                }
+                   
+                );
+                   
+                    
+                $location.path("/photo");
               },
-              error: function(user, error) {
+              error: function(error) {
                 // Show the error message somewhere and let the user try again.
                  swal({title: error.message, cotent: error.code, type: error});
               
@@ -1247,13 +1439,19 @@ app.filter("Location", function(){
     });
 
 app.controller("Logout", function($scope, $location){
+     if(!loggedin()){
+       $location.path("login");
+   }
   Parse.initialize("eTSR27OWlKZsPlg8JBmDxLBVUiuw0A6qLe1yJwHK", "C7aQYWGQstNvi0F1yBYMrF82tM2gNkG0slF4cy3g");
   Parse.User.logOut();
   window.location.reload();
   $location.path("/");
 });	
 
-app.controller("Mail", function($scope, MyParse){
+app.controller("Mail", function($scope, MyParse, $location){
+     if(!loggedin()){
+       $location.path("login");
+   }
     $scope.results = []
     MyParse.getMyMessages().then(function( data){
          var p = JSON.parse(JSON.stringify(data)); // weird
@@ -1264,7 +1462,7 @@ app.controller("Mail", function($scope, MyParse){
     
   
 });
-
+/*
 app.controller("Contacts", function($scope, Cache, MyParse){
     $scope.results =[];
     document.getElementsByTagName('nav')[0].style.display = "none";
@@ -1297,26 +1495,7 @@ app.controller("Contacts", function($scope, Cache, MyParse){
   
 });
 
-/*
-      angular.forEach(items, function (item) {
-        var valueToCheck, isDuplicate = false;
-
-        for (var i = 0; i < newItems.length; i++) {
-          if (angular.equals(extractValueToCompare(newItems[i]), extractValueToCompare(item))) {
-            isDuplicate = true;
-            break;
-          }
-        }
-        if (!isDuplicate) {
-          newItems.push(item);
-        }
-
-      });
-      items = newItems;
-    }
-    return items;
-  };
-});*/
+*/
 app.controller("Home", function($scope){
     Parse.initialize("eTSR27OWlKZsPlg8JBmDxLBVUiuw0A6qLe1yJwHK", "C7aQYWGQstNvi0F1yBYMrF82tM2gNkG0slF4cy3g");
     var user = Parse.User.current();
@@ -1331,7 +1510,12 @@ app.controller("Home", function($scope){
     }
 });
 
-app.controller("Conversation", function($scope, $stateParams, $translate, $http, MyParse, Speak, toastr) {
+app.controller("Conversation", function($scope, $stateParams, $translate, $http, MyParse, Speak, toastr, $location) {
+  
+   if(!loggedin()){
+       $location.path("login");
+   }
+  
     $scope.textarea = "";
     $scope.konsole = "status good";
     $scope.glow = false;
@@ -1692,7 +1876,12 @@ document.getElementsByTagName('nav')[0].style.display = "none";
 });
 
   
-app.controller("Dashboard", function($scope ){
+app.controller("Dashboard", function($scope, $location ){
+
+   if(!loggedin()){
+       $location.path("login");
+   }
+    
 });
 
 app.controller("Profile", function($scope, $stateParams, MyParse, Lightbox,
@@ -1797,17 +1986,37 @@ app.controller("Language", function($scope, $rootScope, Preferance, $location ){
     
 });
 
-app.controller('Favorites', function($scope, Cache, MyParse){
+app.controller('Favorites', function($scope, Cache, MyParse, $location, LocalHost){
+     if(!loggedin()){
+       $location.path("login");
+   }
+
     if(Cache.exists("favorites")){
         
-            $scope.myFavorites = _.uniq( Cache.get("favorites"), 'value' );
+             var res = _.uniq( Cache.get("favorites"), 'value' );
+             var i = 0;
+             res.forEach(function(input){
+                 console.log(input["value"])
+                 MyParse.getPhoto(input["value"]).then(function(rs){
+                     console.log(rs);
+                     input['image'] = localhost+"/images/thumbs/"+rs;
+                   
+                 }).then(function(){
+                       if( i == res.length){
+                           console.log(res);
+                           $scope.myFavorites = res;
+                     }
+                 })
+                 i++;
+             })
+          
             
     }
     
   
 });
 
-app.controller("Swipe", function($scope, MyParse, LocalHost, Ip, GeoLocate, GPS){
+app.controller("Swipe", function($scope, MyParse, LocalHost, GPS){
 
     
         
@@ -1856,7 +2065,10 @@ app.controller("Swipe", function($scope, MyParse, LocalHost, Ip, GeoLocate, GPS)
     
 });
 
-app.controller('Photo', function($scope, $translate, MyParse, $IPaddress, $Photo, LocalHost){
+app.controller('Photo', function($scope, $translate, MyParse, $IPaddress, $Photo, LocalHost, Lightbox){
+    if(!loggedin()){
+       $location.path("login");
+   }
     /*document.getElementById("file").addEventListener('change',
      function(){
           var tx = document.getElementById("pic").value;
@@ -1865,18 +2077,35 @@ app.controller('Photo', function($scope, $translate, MyParse, $IPaddress, $Photo
         
        this.parentNode.submit();
     });*/
+    
+  
+    
+    
+
+    $scope.refresh =function(){
+        window.location.reload();
+    }
     $scope.pics = []
-    user = MyParse.username();
+    try{
+        user = MyParse.username();
     $scope.user = user;
-    $scope.localhost = LocalHost.get();
+    $scope.localhost = LocalHost.get(); 
+    }catch(e){
+        
+    }
+   
     
     $scope.delete = function(id){
         MyParse.delPhoto(id);
+       
     }
     
     MyParse.getPhotos(user).then(function(photos){
             $scope.pics = photos;
-            
+                  $scope.openLightboxModal = function (index) {
+                    Lightbox.openModal(photos, index);
+                 };
+    
     })
     
     
@@ -1885,7 +2114,7 @@ app.controller('Photo', function($scope, $translate, MyParse, $IPaddress, $Photo
               $scope.uploadmsg = MSG;
              var myDropzone = new Dropzone("#dropzone",
    { 
-       url: "http://127.0.0.1:5000/upload",
+       url: localhost+"/upload",
         maxFilesize: 5,
        acceptedFiles: "image/jpeg",
        maxFiles: 4,
@@ -2023,12 +2252,12 @@ app.config(function($stateProvider, $urlRouterProvider) {
       url: "/profile/:username",
       templateUrl: "templates/profile.html",
       controller: "Profile"
-    })
+    })/*
     .state('contacts', {
       url: "/contacts",
       templateUrl: "templates/contacts.html",
       controller: "Contacts"
-    }).state('favorites', {
+    })*/.state('favorites', {
       url: "/favorites",
       templateUrl: "templates/favorites.html",
       controller: "Favorites"

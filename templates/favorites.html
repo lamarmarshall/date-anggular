@@ -2,11 +2,17 @@
 <div class="col-lg-6 col-md-6 col-sm-10 col-xs-12  col-lg-offset-3" style="padding: 30px 30px 30px 30px;">
 	<ul class="list-group">
   <li class="list-group-item" ng-repeat="result in myFavorites">
-      <a ui-sref="profile({ username: result.value })">
+      <p>
+      <img src="{{result.image}}" heigth="50" width="50" class="img-small">
+      </p>
+                                        
+      <a ui-sref="profile({ username: result.value })" class="fav-name">
       {{ result.value }}
       </a>
+    
      
-           <a class="glyphicon glyphicon-comment fa-3x  pull-right" style="color: red; opacity: .4; " ui-sref="conversation({convoid: result.value})"></a>
+     
+           <a class="glyphicon glyphicon-comment fa-5x  pull-right" style="color: red; opacity: .4; margin-top: -50px; " ui-sref="conversation({convoid: result.value})"></a>
    
      
   </li>

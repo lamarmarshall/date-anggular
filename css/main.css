@@ -145,7 +145,15 @@ select.pais{
 	
 	margin-left:  20px;
 }
+.img-small{
+    max-width: 50px;
+    max-height: 50px;
+}
 
+.fav-name{
+    margin-top: 0px;
+    padding-top: 0px;
+}
 
 .result-text img{
 	margin-top: -16px;
